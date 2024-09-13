@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "My Next.js Chrome Extension",
+  "version": "1.0",
+  "description": "A Chrome extension built with Next.js",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "permissions": ["activeTab"]
+}

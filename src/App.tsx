@@ -1,9 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Settings, ArrowUp as Send, ArrowDown as Receive, ArrowLeftRight as Swap, Wallet, LayoutGrid, Clock, Menu, Check } from 'lucide-react';
+import { Settings, Wallet, LayoutGrid, Clock, Menu, Check } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { AccountSelector } from '@/components/WalletDropDown';
+import { NavButton } from '@/components/NavButton';
+import { renderTabContent } from '@/components/renderTabs';
 
 export default function WalletComponent() {
   const [activeAccount, setActiveAccount] = useState('Account 1');
@@ -14,7 +16,7 @@ export default function WalletComponent() {
   return (
     <div className="w-[360px] h-[600px] bg-gray-900 text-white flex">
       <div className="w-16 bg-gray-800 flex flex-col items-center py-4 space-y-6">
-        <AccountSelector activeAccount={activeAccount} setActiveAccount={setActiveAccount} />
+        <AccountSelector activeAccount={activeAccount} />
         <NavButton icon={<Wallet className="h-5 w-5" />} isActive={activeTab === 'wallet'} onClick={() => setActiveTab('wallet')} />
         <NavButton icon={<LayoutGrid className="h-5 w-5" />} isActive={activeTab === 'nfts'} onClick={() => setActiveTab('nfts')} />
         <NavButton icon={<Clock className="h-5 w-5" />} isActive={activeTab === 'activity'} onClick={() => setActiveTab('activity')} />
@@ -24,7 +26,7 @@ export default function WalletComponent() {
       </div>
       <div className="flex-1 flex flex-col">
         <header className="p-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold">{getHeaderTitle(activeTab)}</h1>
+          <h1 className="text-xl font-bold">{activeAccount}</h1>
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="text-white">
@@ -70,138 +72,5 @@ export default function WalletComponent() {
         <div className="flex-1 overflow-hidden flex flex-col">{renderTabContent(activeTab)}</div>
       </div>
     </div>
-  );
-}
-
-function AccountSelector({ activeAccount }: any) {
-  return (
-    <Button variant="ghost" className="w-12 h-12 rounded-full bg-blue-500 text-white font-bold text-xl p-0 relative">
-      {activeAccount[0]}
-    </Button>
-  );
-}
-
-function NavButton({ icon, isActive, onClick }: any) {
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className={`text-gray-400 hover:text-white hover:bg-gray-700 ${isActive ? 'bg-gray-700 text-white' : ''}`}
-      onClick={onClick}
-    >
-      {icon}
-    </Button>
-  );
-}
-
-function renderTabContent(activeTab: string) {
-  switch (activeTab) {
-    case 'wallet':
-      return <WalletContent />;
-    case 'nfts':
-      return <NftsContent />;
-    case 'activity':
-      return <ActivityContent />;
-    case 'settings':
-      return <SettingsContent />;
-    default:
-      return <WalletContent />;
-  }
-}
-
-function getHeaderTitle(activeTab: string) {
-  switch (activeTab) {
-    case 'wallet':
-      return 'Wallet';
-    case 'nfts':
-      return 'NFTs';
-    case 'activity':
-      return 'Activity';
-    case 'settings':
-      return 'Settings';
-    default:
-      return 'Wallet';
-  }
-}
-
-function WalletContent() {
-  return (
-    <>
-      <div className="p-4 text-center">
-        <p className="text-sm text-gray-400">Total Balance</p>
-        <h2 className="text-3xl font-bold">$1,234.56</h2>
-      </div>
-
-      <ScrollArea className="flex-1 px-4">
-        <div className="space-y-2">
-          <TokenItem name="Solana" symbol="SOL" amount="12.5" value="1000.00" change="+5.2%" />
-          <TokenItem name="USD Coin" symbol="USDC" amount="200" value="200.00" change="0%" />
-          <TokenItem name="Ethereum" symbol="ETH" amount="0.1" value="34.56" change="-2.1%" />
-        </div>
-      </ScrollArea>
-
-      <div className="p-4 grid grid-cols-3 gap-2">
-        <ActionButton icon={<Send className="h-4 w-4" />} label="Send" />
-        <ActionButton icon={<Receive className="h-4 w-4" />} label="Receive" />
-        <ActionButton icon={<Swap className="h-4 w-4" />} label="Swap" />
-      </div>
-    </>
-  );
-}
-
-function NftsContent() {
-  return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold">Your NFTs</h2>
-      <p className="text-gray-400">No NFTs available yet.</p>
-    </div>
-  );
-}
-
-function ActivityContent() {
-  return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold">Recent Activity</h2>
-      <p className="text-gray-400">No recent activity.</p>
-    </div>
-  );
-}
-
-function SettingsContent() {
-  return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold">Settings</h2>
-      <p className="text-gray-400">Manage your account settings.</p>
-    </div>
-  );
-}
-
-function TokenItem({ name, symbol, amount, value, change }: any) {
-  const isPositive = change.startsWith('+');
-  return (
-    <div className="flex justify-between items-center py-2">
-      <div className="flex items-center space-x-3">
-        <div className="w-8 h-8 bg-blue-500 rounded-full" />
-        <div>
-          <p className="font-medium">{name}</p>
-          <p className="text-sm text-gray-400">
-            {amount} {symbol}
-          </p>
-        </div>
-      </div>
-      <div className="text-right">
-        <p className="font-medium">${value}</p>
-        <p className={`text-sm ${isPositive ? 'text-green-400' : 'text-red-400'}`}>{change}</p>
-      </div>
-    </div>
-  );
-}
-
-function ActionButton({ icon, label }: any) {
-  return (
-    <Button variant="outline" className="flex flex-col items-center justify-center h-16 bg-gray-800 border-gray-700 text-white hover:bg-gray-700">
-      {icon}
-      <span className="mt-1 text-xs">{label}</span>
-    </Button>
   );
 }

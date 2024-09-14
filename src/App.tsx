@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Settings, Wallet, LayoutGrid, Clock, Menu, Check } from 'lucide-react';
@@ -6,12 +6,17 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { AccountSelector } from '@/components/WalletDropDown';
 import { NavButton } from '@/components/NavButton';
 import { renderTabContent } from '@/components/renderTabs';
+import { isFirstTime } from './utils';
 
 export default function WalletComponent() {
   const [activeAccount, setActiveAccount] = useState('Account 1');
   const [activeTab, setActiveTab] = useState('wallet');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const accounts = ['Account 1', 'Account 2', 'Account 3', 'Account 4', 'Account 5', 'Account 6', 'Account 7', 'Account 8'];
+
+  useEffect(() => {
+    isFirstTime();
+  }, []);
 
   return (
     <div className="w-[360px] h-[600px] bg-gray-900 text-white flex">

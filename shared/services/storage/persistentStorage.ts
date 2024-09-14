@@ -1,4 +1,4 @@
-import { BaseStorage } from '@/services/storage/baseStorage';
+import { BaseStorage } from './baseStorage';
 
 export class PersistentStorage<T> extends BaseStorage<T> {
   constructor() {

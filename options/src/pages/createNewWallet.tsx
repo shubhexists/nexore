@@ -5,8 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { AlertTriangle, Lock, Copy } from 'lucide-react';
-import { BIP39 } from '@/services/bip39/bip39';
 import { SetupComplete } from '@/components/finalScreen';
+import { PersistentStorage, IS_FIRST_TIME, BIP39 } from '@/shared';
 
 export function CreateNewComponent() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -129,8 +129,6 @@ export function CreateNewComponent() {
           >
             Save these words in a safe place.
           </motion.p>
-
-          {/* Card Component */}
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}>
             <Card onClick={handleCopy} className="relative bg-gray-800 border-gray-700 mb-6 cursor-pointer">
               <CardContent className="grid grid-cols-3 gap-2 p-4">
@@ -147,8 +145,6 @@ export function CreateNewComponent() {
                   </motion.div>
                 ))}
               </CardContent>
-
-              {/* Copy confirmation animation */}
               <AnimatePresence>
                 {copied && (
                   <motion.div
@@ -173,8 +169,6 @@ export function CreateNewComponent() {
             <Copy className="w-4 h-4 mr-1" />
             Click anywhere on this card to copy
           </motion.p>
-
-          {/* Checkbox for confirmation */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -191,11 +185,12 @@ export function CreateNewComponent() {
     },
   ];
 
-  const nextSlide = () => {
+  const nextSlide = async () => {
     if (currentSlide < slides.length - 1 && isSlideValid()) {
       setCurrentSlide(currentSlide + 1);
       setChecked(false);
     } else if (currentSlide === slides.length - 1) {
+      await new PersistentStorage<boolean>().setItem(IS_FIRST_TIME, false);
       setIsSetupComplete(true);
     }
   };

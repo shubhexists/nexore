@@ -1,6 +1,6 @@
 import * as bip39 from 'bip39';
 
-export class BIP39Wrapper {
+export class BIP39 {
   private wordlist?: string[];
 
   constructor(wordlist?: string[]) {
@@ -9,11 +9,11 @@ export class BIP39Wrapper {
     }
   }
 
-  generateMnemonic(strength: number = 128): string {
+  generateMnemonic(strength: number = 128): string[] {
     if (this.wordlist) {
-      return bip39.generateMnemonic(strength, undefined, this.wordlist);
+      return bip39.generateMnemonic(strength, undefined, this.wordlist).split(' ');
     }
-    return bip39.generateMnemonic(strength);
+    return bip39.generateMnemonic(strength).split(' ');
   }
 
   async mnemonicToSeed(mnemonic: string, passphrase: string = ''): Promise<Buffer> {

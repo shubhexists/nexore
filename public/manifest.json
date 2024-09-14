@@ -6,5 +6,15 @@
   "action": {
     "default_popup": "index.html"
   },
-  "permissions": ["storage"]
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+W"
+      }
+    }
+  },
+  "background": {
+    "service_worker": "background.ts"
+  },
+  "permissions": ["storage", "tabs"]
 }

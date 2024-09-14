@@ -8,5 +8,6 @@ export async function isFirstTime() {
   const isFirstTime = await storage.getItem(IS_FIRST_TIME);
   if (typeof isFirstTime === 'undefined') {
     chrome.tabs.create({ url: 'contents.html' });
+    window.close();
   }
 }

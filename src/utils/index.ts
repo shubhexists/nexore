@@ -7,6 +7,6 @@ export async function isFirstTime() {
   const storage = new PersistentStorage<boolean>();
   const isFirstTime = await storage.getItem(IS_FIRST_TIME);
   if (typeof isFirstTime === 'undefined') {
-    chrome.tabs.create({ url: 'options.html?onboarding=true' });
+    chrome.tabs.create({ url: 'contents.html?onboarding=true' });
   }
 }

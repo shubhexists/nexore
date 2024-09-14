@@ -1,1 +1,4 @@
 export const IS_FIRST_TIME = 'IS_FIRST_TIME';
+export const PASSWORD_VALID_TILL = 'PASSWORD_VALID_TILL';
+export const USER_SECURE_DATA = 'USER_SECURE';
+export const IS_LOCKED = 'IS_LOCKED';

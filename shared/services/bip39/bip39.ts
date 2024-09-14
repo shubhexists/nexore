@@ -16,12 +16,16 @@ export class BIP39 {
     return bip39.generateMnemonic(strength).split(' ');
   }
 
-  async mnemonicToSeed(mnemonic: string, passphrase: string = ''): Promise<Buffer> {
-    return await bip39.mnemonicToSeed(mnemonic, passphrase);
+  mnemonicToSeed(mnemonic: string, passphrase: string = ''): Buffer {
+    return bip39.mnemonicToSeedSync(mnemonic, passphrase);
   }
 
-  async mnemonicToSeedHex(mnemonic: string, passphrase: string = ''): Promise<string> {
-    const seedBuffer = await this.mnemonicToSeed(mnemonic, passphrase);
+  mnemonicToSeedHex(mnemonic: string, passphrase: string = ''): string {
+    const seedBuffer = this.mnemonicToSeed(mnemonic, passphrase);
     return seedBuffer.toString('hex');
+  }
+
+  seedToHex(seed: Buffer): string {
+    return seed.toString('hex');
   }
 }

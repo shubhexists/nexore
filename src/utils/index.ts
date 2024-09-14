@@ -1,5 +1,4 @@
-import { IS_FIRST_TIME } from '../../shared/constants/constants';
-import { PersistentStorage } from '../../shared/services/storage/persistentStorage';
+import { IS_FIRST_TIME, PersistentStorage } from '@/shared';
 
 export * from './getHeaderName';
 

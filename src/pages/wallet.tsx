@@ -14,7 +14,6 @@ export function WalletContent() {
       <ScrollArea className="flex-1 px-4">
         <div className="space-y-2">
           <TokenItem name="Solana" symbol="SOL" amount="12.5" value="1000.00" change="+5.2%" />
-          <TokenItem name="Bitcoin" symbol="BTC" amount="200" value="200.00" change="0%" />
           <TokenItem name="Ethereum" symbol="ETH" amount="0.1" value="34.56" change="-2.1%" />
           <TokenItem name="Polygon" symbol="POL" amount="0.1" value="34.56" change="-2.1%" />
         </div>

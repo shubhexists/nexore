@@ -9,7 +9,6 @@ const wallets: WalletInfo[] = [
   { name: 'Solana', icon: '◎', address: 'epG7...2Pzw' },
   { name: 'Ethereum', icon: 'Ξ', address: '0x6870...d19A' },
   { name: 'Polygon', icon: '⏣', address: '0x6870...d19P' },
-  { name: 'Bitcoin', icon: '₿', address: 'bc1q...l0t5' },
 ];
 
 export function AccountSelector({ activeAccount }: { activeAccount: string }) {

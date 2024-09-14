@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { AlertTriangle, Lock, Copy } from 'lucide-react';
 import { SetupComplete } from '@/components/finalScreen';
-import { PersistentStorage, IS_FIRST_TIME, BIP39 } from '@/shared';
+import { PersistentStorage, IS_FIRST_TIME, BIP39, HDKeys } from '@/shared';
 
 export function CreateNewComponent() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -16,6 +16,10 @@ export function CreateNewComponent() {
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [isSetupComplete, setIsSetupComplete] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const ethPath = "m/44'/60'/0'/0/0";
+  const polPath = "m/44'/60'/0'/0/0";
+  const solPath = "m/44'/501'/0'/0'";
 
   useEffect(() => {
     const generatedMnemonic = new BIP39().generateMnemonic(128);
@@ -191,6 +195,11 @@ export function CreateNewComponent() {
       setChecked(false);
     } else if (currentSlide === slides.length - 1) {
       await new PersistentStorage<boolean>().setItem(IS_FIRST_TIME, false);
+      const seedBuffer = new BIP39().mnemonicToSeed(mnemonic.join(' '));
+      const ethKey = new HDKeys(seedBuffer, ethPath).generateEthereumPublicKey();
+      const polKey = new HDKeys(seedBuffer, polPath).generatePolygonPublicKey();
+      const solKey = new HDKeys(seedBuffer, solPath).generateSolanaPublicKey();
+      console.log(ethKey, solKey, polKey);
       setIsSetupComplete(true);
     }
   };

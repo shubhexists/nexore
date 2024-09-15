@@ -23,7 +23,11 @@ export function HomeComponent({ setPage }: HomeComponentProps) {
         >
           Create a new wallet
         </Button>
-        <Button variant="outline" className="w-full bg-gray-800 text-white hover:bg-gray-700" onClick={() => setPage(Pages.IMPORT)}>
+        <Button
+          variant="outline"
+          className="w-full bg-gray-800 text-white hover:bg-gray-700"
+          onClick={() => setPage(Pages.IMPORT)}
+        >
           Import Wallet
         </Button>
       </div>

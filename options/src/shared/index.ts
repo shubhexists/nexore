@@ -5,4 +5,14 @@ import { IS_FIRST_TIME, USER_SECURE_DATA, PASSWORD_VALID_TILL, IS_LOCKED } from 
 import { HDKeys } from '../../../shared/services/HDKey/HDKey';
 import * as Utils from '../../../shared/services/utils';
 
-export { PersistentStorage, SessionStorage, BIP39, IS_FIRST_TIME, HDKeys, USER_SECURE_DATA, IS_LOCKED, PASSWORD_VALID_TILL, Utils };
+export {
+  PersistentStorage,
+  SessionStorage,
+  BIP39,
+  IS_FIRST_TIME,
+  HDKeys,
+  USER_SECURE_DATA,
+  IS_LOCKED,
+  PASSWORD_VALID_TILL,
+  Utils,
+};

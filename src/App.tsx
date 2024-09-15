@@ -12,7 +12,16 @@ export default function WalletComponent() {
   const [activeAccount, setActiveAccount] = useState('Account 1');
   const [activeTab, setActiveTab] = useState('wallet');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const accounts = ['Account 1', 'Account 2', 'Account 3', 'Account 4', 'Account 5', 'Account 6', 'Account 7', 'Account 8'];
+  const accounts = [
+    'Account 1',
+    'Account 2',
+    'Account 3',
+    'Account 4',
+    'Account 5',
+    'Account 6',
+    'Account 7',
+    'Account 8',
+  ];
 
   useEffect(() => {
     isFirstTime();
@@ -22,11 +31,27 @@ export default function WalletComponent() {
     <div className="w-[360px] h-[600px] bg-gray-900 text-white flex">
       <div className="w-16 bg-gray-800 flex flex-col items-center py-4 space-y-6">
         <AccountSelector activeAccount={activeAccount} />
-        <NavButton icon={<Wallet className="h-5 w-5" />} isActive={activeTab === 'wallet'} onClick={() => setActiveTab('wallet')} />
-        <NavButton icon={<LayoutGrid className="h-5 w-5" />} isActive={activeTab === 'nfts'} onClick={() => setActiveTab('nfts')} />
-        <NavButton icon={<Clock className="h-5 w-5" />} isActive={activeTab === 'activity'} onClick={() => setActiveTab('activity')} />
+        <NavButton
+          icon={<Wallet className="h-5 w-5" />}
+          isActive={activeTab === 'wallet'}
+          onClick={() => setActiveTab('wallet')}
+        />
+        <NavButton
+          icon={<LayoutGrid className="h-5 w-5" />}
+          isActive={activeTab === 'nfts'}
+          onClick={() => setActiveTab('nfts')}
+        />
+        <NavButton
+          icon={<Clock className="h-5 w-5" />}
+          isActive={activeTab === 'activity'}
+          onClick={() => setActiveTab('activity')}
+        />
         <div className="mt-auto">
-          <NavButton icon={<Settings className="h-5 w-5" />} isActive={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
+          <NavButton
+            icon={<Settings className="h-5 w-5" />}
+            isActive={activeTab === 'settings'}
+            onClick={() => setActiveTab('settings')}
+          />
         </div>
       </div>
       <div className="flex-1 flex flex-col">
@@ -60,7 +85,10 @@ export default function WalletComponent() {
                     >
                       <div className="flex items-center space-x-3">
                         {' '}
-                        <div className="w-8 h-8 rounded-full bg-blue-500 text-white font-bold flex items-center justify-center"> {account[0]}</div>
+                        <div className="w-8 h-8 rounded-full bg-blue-500 text-white font-bold flex items-center justify-center">
+                          {' '}
+                          {account[0]}
+                        </div>
                         <div className="flex-grow">
                           <p className="font-medium">{account}</p>
                         </div>

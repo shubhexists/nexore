@@ -24,7 +24,9 @@ function TokenItem({ name, symbol, amount, value, change }: TokenItemProps) {
   return (
     <div className="flex justify-between items-center py-2">
       <div className="flex items-center space-x-3">
-        <div className="w-8 h-8 rounded-full flex items-center justify-center">{Logo && <Logo className="w-6 h-6 text-white" />}</div>
+        <div className="w-8 h-8 rounded-full flex items-center justify-center">
+          {Logo && <Logo className="w-6 h-6 text-white" />}
+        </div>
         <div>
           <p className="font-medium">{name}</p>
           <p className="text-sm text-gray-400">

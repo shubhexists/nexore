@@ -10,8 +10,10 @@ import { PersistentStorage, IS_FIRST_TIME, BIP39, HDKeys } from '@/shared';
 
 export function CreateNewComponent() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [checked, setChecked] = useState(false);
+  const [phraseSaved, setPhraseSaved] = useState(false);
+  const [phraseWarningAcknowledged, setPhraseWarningAcknowledged] = useState(false);
   const [password, setPassword] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [isSetupComplete, setIsSetupComplete] = useState(false);
@@ -32,6 +34,16 @@ export function CreateNewComponent() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  const handleFinish = async () => {
+    await new PersistentStorage<boolean>().setItem(IS_FIRST_TIME, false);
+    const seedBuffer = new BIP39().mnemonicToSeed(mnemonic.join(' '));
+    const ethKey = new HDKeys(seedBuffer, ethPath).generateEthereumPublicKey();
+    const polKey = new HDKeys(seedBuffer, polPath).generatePolygonPublicKey();
+    const solKey = new HDKeys(seedBuffer, solPath).generateSolanaPublicKey();
+    console.log(ethKey, solKey, polKey);
+    setIsSetupComplete(true);
   };
 
   const slides = [
@@ -76,8 +88,8 @@ export function CreateNewComponent() {
           >
             <Checkbox
               id="terms"
-              checked={checked}
-              onCheckedChange={() => setChecked(!checked)}
+              checked={termsAccepted}
+              onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
               className="border-white"
             />
             <label
@@ -87,6 +99,13 @@ export function CreateNewComponent() {
               I agree to the <span className="text-white">Terms of Service</span>
             </label>
           </motion.div>
+          <Button
+            onClick={() => setCurrentSlide(1)}
+            disabled={password !== confirmPassword || password.length === 0 || !termsAccepted}
+            className="w-full mt-6 bg-white text-gray-900 hover:bg-gray-200"
+          >
+            Continue
+          </Button>
         </>
       ),
     },
@@ -131,8 +150,8 @@ export function CreateNewComponent() {
           >
             <Checkbox
               id="understand"
-              checked={checked}
-              onCheckedChange={() => setChecked(!checked)}
+              checked={phraseWarningAcknowledged}
+              onCheckedChange={(checked) => setPhraseWarningAcknowledged(checked as boolean)}
               className="border-white"
             />
             <label
@@ -143,6 +162,13 @@ export function CreateNewComponent() {
               recover my wallet.
             </label>
           </motion.div>
+          <Button
+            onClick={() => setCurrentSlide(2)}
+            disabled={!phraseWarningAcknowledged}
+            className="w-full mt-6 bg-white text-gray-900 hover:bg-gray-200"
+          >
+            Show Secret Recovery Phrase
+          </Button>
         </>
       ),
     },
@@ -192,7 +218,6 @@ export function CreateNewComponent() {
               </AnimatePresence>
             </Card>
           </motion.div>
-
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -210,8 +235,8 @@ export function CreateNewComponent() {
           >
             <Checkbox
               id="saved"
-              checked={checked}
-              onCheckedChange={() => setChecked(!checked)}
+              checked={phraseSaved}
+              onCheckedChange={(checked) => setPhraseSaved(checked as boolean)}
               className="border-white"
             />
             <label
@@ -221,32 +246,17 @@ export function CreateNewComponent() {
               I saved my secret recovery phrase
             </label>
           </motion.div>
+          <Button
+            onClick={handleFinish}
+            disabled={!phraseSaved}
+            className="w-full mt-6 bg-white text-gray-900 hover:bg-gray-200"
+          >
+            Finish
+          </Button>
         </>
       ),
     },
   ];
-
-  const nextSlide = async () => {
-    if (currentSlide < slides.length - 1 && isSlideValid()) {
-      setCurrentSlide(currentSlide + 1);
-      setChecked(false);
-    } else if (currentSlide === slides.length - 1) {
-      await new PersistentStorage<boolean>().setItem(IS_FIRST_TIME, false);
-      const seedBuffer = new BIP39().mnemonicToSeed(mnemonic.join(' '));
-      const ethKey = new HDKeys(seedBuffer, ethPath).generateEthereumPublicKey();
-      const polKey = new HDKeys(seedBuffer, polPath).generatePolygonPublicKey();
-      const solKey = new HDKeys(seedBuffer, solPath).generateSolanaPublicKey();
-      console.log(ethKey, solKey, polKey);
-      setIsSetupComplete(true);
-    }
-  };
-
-  const isSlideValid = () => {
-    if (currentSlide === 0) {
-      return password === confirmPassword && password.length > 0 && checked;
-    }
-    return checked;
-  };
 
   if (isSetupComplete) {
     return <SetupComplete />;
@@ -284,15 +294,6 @@ export function CreateNewComponent() {
             {slides[currentSlide].content}
           </motion.div>
         </AnimatePresence>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-          <Button
-            onClick={nextSlide}
-            disabled={!isSlideValid()}
-            className="w-full mt-6 bg-white text-gray-900 hover:bg-gray-200"
-          >
-            {currentSlide === slides.length - 1 ? 'Finish' : 'Continue'}
-          </Button>
-        </motion.div>
       </div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}

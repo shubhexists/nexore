@@ -1,13 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Utils } from '@/shared';
+import { BIP39, Utils } from '@/shared';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SetupComplete } from '@/components/finalScreen';
@@ -47,7 +47,104 @@ export function ImportComponent() {
   const [isSetupComplete, setIsSetupComplete] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [invalidWords, setInvalidWords] = useState<number[]>([]);
   const [hoveredMethod, setHoveredMethod] = useState<string | null>(null);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  function makeGoodInputMessage(): string {
+    const sortedInvalidWords = invalidWords.sort((a, b) => a - b);
+    let outputString = '';
+
+    if (sortedInvalidWords.length === 1) {
+      outputString = `Word ${sortedInvalidWords[0] + 1} is incorrect or misspelled.`;
+    } else {
+      outputString = 'Words ';
+      for (let i = 0; i < sortedInvalidWords.length - 1; i++) {
+        outputString += `${sortedInvalidWords[i] + 1}, `;
+      }
+      outputString = outputString.slice(0, -2);
+      outputString += ` and ${sortedInvalidWords[sortedInvalidWords.length - 1] + 1} are incorrect or misspelled.`;
+    }
+    return outputString;
+  }
+
+  const handleInputChange = useCallback(
+    (index: number, value: string) => {
+      setRecoveryPhrase((prev) => {
+        const newPhrase = [...prev];
+        newPhrase[index] = value.toLowerCase().replace(/[^a-z]/g, '');
+        return newPhrase;
+      });
+
+      if (value.endsWith(' ') && index < (use24Words ? 23 : 11)) {
+        inputRefs.current[index + 1]?.focus();
+      }
+    },
+    [use24Words]
+  );
+
+  const handlePaste = useCallback(
+    (index: number, pastedText: string) => {
+      const words = pastedText
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((word) => word.match(/^[a-z]+$/));
+      const maxWords = use24Words ? 24 : 12;
+
+      setRecoveryPhrase((prev) => {
+        const newPhrase = [...prev];
+        for (let i = 0; i < words.length && index + i < maxWords; i++) {
+          newPhrase[index + i] = words[i];
+        }
+        return newPhrase;
+      });
+      const focusIndex = Math.min(index + words.length, maxWords - 1);
+      setTimeout(() => {
+        inputRefs.current[focusIndex]?.focus();
+        const input = inputRefs.current[focusIndex];
+        if (input) {
+          const len = input.value.length;
+          input.setSelectionRange(len, len);
+        }
+      }, 0);
+    },
+    [use24Words]
+  );
+  const bip = new BIP39();
+  const isWordInBIP39List = useCallback(bip.isWordInBIP39List, []);
+
+  const validateWords = useCallback(() => {
+    const newInvalidWords = recoveryPhrase
+      .map((word, index) => (word !== '' && !isWordInBIP39List(word) ? index : -1))
+      .filter((index) => index !== -1);
+    setInvalidWords(newInvalidWords);
+  }, [recoveryPhrase, isWordInBIP39List]);
+
+  useEffect(() => {
+    validateWords();
+  }, [recoveryPhrase, validateWords]);
+
+  const handleSwitchChange = useCallback(() => {
+    setUse24Words((prev) => !prev);
+    setRecoveryPhrase((prev) => {
+      if (prev.length === 12) {
+        return [...prev, ...Array(12).fill('')];
+      } else {
+        return prev.slice(0, 12);
+      }
+    });
+  }, []);
+
+  const handleImport = useCallback(() => {
+    const seed = bip.mnemonicToSeed(recoveryPhrase.join(' '));
+    console.log(seed);
+  }, [recoveryPhrase]);
+
+  useEffect(() => {
+    inputRefs.current = inputRefs.current.slice(0, use24Words ? 24 : 12);
+  }, [use24Words]);
+
+  const isImportDisabled = recoveryPhrase.some((word) => word === '') || invalidWords.length > 0;
 
   const handlePrivateKeyChange = (value: string) => {
     const trimmedValue = value.trim();
@@ -139,13 +236,7 @@ export function ImportComponent() {
             <p className="text-center text-sm text-gray-400 mb-6">Enter or paste your 12 or 24-word phrase.</p>
             <div className="flex items-center justify-center space-x-2 mb-4">
               <span className="text-sm text-gray-400">Use 24 words</span>
-              <Switch
-                checked={use24Words}
-                onCheckedChange={() => {
-                  setUse24Words(!use24Words);
-                  setRecoveryPhrase(Array(use24Words ? 12 : 24).fill(''));
-                }}
-              />
+              <Switch checked={use24Words} onCheckedChange={handleSwitchChange} />
             </div>
             <div className="grid grid-cols-3 gap-2 mb-6">
               {recoveryPhrase.map((word, index) => (
@@ -154,19 +245,22 @@ export function ImportComponent() {
                   type="text"
                   placeholder={`${index + 1}`}
                   value={word}
-                  onChange={(e) => {
-                    const newPhrase = [...recoveryPhrase];
-                    newPhrase[index] = e.target.value;
-                    setRecoveryPhrase(newPhrase);
+                  onChange={(e) => handleInputChange(index, e.target.value)}
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    const pastedText = e.clipboardData.getData('text');
+                    handlePaste(index, pastedText);
                   }}
-                  className="bg-gray-800 border-gray-700 text-white"
+                  ref={(el) => (inputRefs.current[index] = el)}
+                  className={`bg-gray-800 border-gray-700 text-white ${invalidWords.includes(index) ? 'border-red-500' : ''}`}
                 />
               ))}
             </div>
+            {invalidWords.length > 0 && <p className="text-red-500 text-sm mb-2">{makeGoodInputMessage()}</p>}
             <Button
-              onClick={() => console.log('Recovery phrase imported')}
-              disabled={recoveryPhrase.some((word) => word === '')}
-              className="w-full mt-6 bg-white text-gray-900 hover:bg-gray-200"
+              onClick={handleImport}
+              disabled={isImportDisabled}
+              className="w-full mt-6 bg-white text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Import
             </Button>

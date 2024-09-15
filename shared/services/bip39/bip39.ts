@@ -28,4 +28,9 @@ export class BIP39 {
   seedToHex(seed: Buffer): string {
     return seed.toString('hex');
   }
+
+  isWordInBIP39List(word: string): boolean {
+    const wordlist = bip39.wordlists.english;
+    return wordlist.includes(word.toLowerCase());
+  }
 }

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { motion, AnimatePresence } from 'framer-motion';
+import { isFirstTime } from './utils';
 
 export default function Component() {
   const [activeAccount, setActiveAccount] = useState('Main Wallet');
@@ -28,6 +29,10 @@ export default function Component() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const accounts = ['Main Wallet', 'Trading Wallet', 'Savings Wallet', 'NFT Wallet'];
   const [balance, setBalance] = useState({ usd: 1234.56, sol: 12.5 });
+
+  useEffect(() => {
+    isFirstTime();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {

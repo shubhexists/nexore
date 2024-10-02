@@ -1,17 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { BIP39, Utils } from '@/shared';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { SetupComplete } from '@/components/finalScreen';
-import { KeyIcon, LockIcon, ArrowRightIcon } from 'lucide-react';
+import { KeyIcon, LockIcon } from 'lucide-react';
+import React from 'react';
+
+const InitialSlide = React.lazy(() => import('@/components/_importWallet/initialScreen'));
+const RecoveryPhraseInput = React.lazy(() => import('@/components/_importWallet/recoveryPhase'));
+const PrivateKeyInputProps = React.lazy(() => import('@/components/_importWallet/privateKeyOne'));
+const PasswordSetup = React.lazy(() => import('@/components/_importWallet/privateKeyTwo'));
+
+const SetupComplete = React.lazy(() => import('@/components/finalScreen'));
 
 const importMethods = [
   {
@@ -184,47 +184,14 @@ export function ImportComponent() {
       {
         title: 'Import your Wallet(s)',
         content: (
-          <div className="space-y-4 mt-4">
-            {importMethods.map((method) => (
-              <motion.div
-                key={method.name}
-                onClick={() => setSelectedMethod(method.name)}
-                className="relative overflow-hidden rounded-lg"
-                whileHover={{ scale: 1.03 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 10 }}
-              >
-                <div
-                  className={`absolute inset-0 bg-gradient-to-r ${method.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
-                />
-                <button
-                  className="relative w-full p-4 bg-gray-800 text-left transition-all duration-300 group hover:bg-opacity-80"
-                  onMouseEnter={() => setHoveredMethod(method.name)}
-                  onMouseLeave={() => setHoveredMethod(null)}
-                >
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 mr-4">
-                      <method.icon className="h-8 w-8 text-gray-400 group-hover:text-white transition-colors duration-300" />
-                    </div>
-                    <div className="flex-grow">
-                      <h3 className="text-lg font-semibold text-white group-hover:text-white transition-colors duration-300">
-                        {method.name}
-                      </h3>
-                      <p className="text-sm text-gray-400 group-hover:text-gray-200 transition-colors duration-300">
-                        {method.description}
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0 ml-4">
-                      <ArrowRightIcon
-                        className={`h-6 w-6 text-white transition-all duration-300 ${
-                          hoveredMethod === method.name ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
-                        }`}
-                      />
-                    </div>
-                  </div>
-                </button>
-              </motion.div>
-            ))}
-          </div>
+          <Suspense>
+            <InitialSlide
+              importMethods={importMethods}
+              hoveredMethod={hoveredMethod}
+              setHoveredMethod={setHoveredMethod}
+              setSelectedMethod={setSelectedMethod}
+            />
+          </Suspense>
         ),
       },
     ],
@@ -232,39 +199,19 @@ export function ImportComponent() {
       {
         title: 'Secret Recovery Phrase',
         content: (
-          <>
-            <p className="text-center text-sm text-gray-400 mb-6">Enter or paste your 12 or 24-word phrase.</p>
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <span className="text-sm text-gray-400">Use 24 words</span>
-              <Switch checked={use24Words} onCheckedChange={handleSwitchChange} />
-            </div>
-            <div className="grid grid-cols-3 gap-2 mb-6">
-              {recoveryPhrase.map((word, index) => (
-                <Input
-                  key={index}
-                  type="text"
-                  placeholder={`${index + 1}`}
-                  value={word}
-                  onChange={(e) => handleInputChange(index, e.target.value)}
-                  onPaste={(e) => {
-                    e.preventDefault();
-                    const pastedText = e.clipboardData.getData('text');
-                    handlePaste(index, pastedText);
-                  }}
-                  ref={(el) => (inputRefs.current[index] = el)}
-                  className={`bg-gray-800 border-gray-700 text-white ${invalidWords.includes(index) ? 'border-red-500' : ''}`}
-                />
-              ))}
-            </div>
-            {invalidWords.length > 0 && <p className="text-red-500 text-sm mb-2">{makeGoodInputMessage()}</p>}
-            <Button
-              onClick={handleImport}
-              disabled={isImportDisabled}
-              className="w-full mt-6 bg-white text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Import
-            </Button>
-          </>
+          <Suspense>
+            <RecoveryPhraseInput
+              recoveryPhrase={recoveryPhrase}
+              use24Words={use24Words}
+              handleImport={handleImport}
+              handleInputChange={handleInputChange}
+              handlePaste={handlePaste}
+              handleSwitchChange={handleSwitchChange}
+              invalidWords={invalidWords}
+              isImportDisabled={isImportDisabled}
+              makeGoodInputMessage={makeGoodInputMessage}
+            />
+          </Suspense>
         ),
       },
     ],
@@ -272,124 +219,36 @@ export function ImportComponent() {
       {
         title: 'Import Private Key',
         content: (
-          <>
-            <p className="text-center text-sm text-gray-400 mb-6">Enter your private key.</p>
-
-            <div className="space-y-2">
-              <Label htmlFor="blockchain" className="text-white">
-                Select Blockchain
-              </Label>
-              <Select onValueChange={setSelectedBlockchain} value={selectedBlockchain}>
-                <SelectTrigger id="blockchain" className="w-full bg-gray-800 border-gray-700 text-white">
-                  <SelectValue placeholder="Select blockchain" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
-                  {blockchains.map((blockchain) => (
-                    <SelectItem key={blockchain.value} value={blockchain.value} className="text-white">
-                      <div className="flex items-center">
-                        <span className="mr-2">{blockchain.icon}</span>
-                        {blockchain.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Input
-              id="walletName"
-              placeholder="Enter Wallet Name"
-              className="bg-gray-800 border-gray-700 text-white mt-4"
-              value={walletName}
-              onChange={(e) => setWalletName(e.target.value)}
+          <Suspense>
+            <PrivateKeyInputProps
+              walletName={walletName}
+              walletAddress={walletAddress}
+              selectedBlockchain={selectedBlockchain}
+              privateKey={privateKey}
+              handlePrivateKeyChange={handlePrivateKeyChange}
+              setWalletName={setWalletName}
+              currentSlide={currentSlide}
+              blockchains={blockchains}
+              setCurrentSlide={setCurrentSlide}
+              setSelectedBlockchain={setSelectedBlockchain}
             />
-
-            <Textarea
-              id="privateKey"
-              placeholder="Enter private key"
-              className={`bg-gray-800 border-gray-700 text-white h-40 resize-none mt-4 ${walletAddress === 'Invalid Format' ? 'border-red-500' : ''}`}
-              value={privateKey}
-              onChange={(e) => handlePrivateKeyChange(e.target.value)}
-            />
-
-            {walletAddress && (
-              <div className="mt-4">
-                <Label className="text-white">Wallet Address</Label>
-                <p className={`mt-1 text-sm ${walletAddress === 'Invalid Format' ? 'text-red-500' : 'text-green-500'}`}>
-                  {walletAddress}
-                </p>
-              </div>
-            )}
-            <Button
-              onClick={() => setCurrentSlide(currentSlide + 1)}
-              disabled={!walletName || !walletAddress || walletAddress === 'Invalid Format'}
-              className="w-full mt-6 bg-white text-gray-900 hover:bg-gray-200"
-            >
-              Import
-            </Button>
-          </>
+          </Suspense>
         ),
       },
       {
         title: 'Create a password',
         content: (
-          <>
-            <motion.p
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-center text-sm text-gray-400 mb-6"
-            >
-              You will use this to unlock your wallet.
-            </motion.p>
-            <motion.div
-              className="space-y-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-gray-800 border-gray-700 text-white"
-              />
-              <Input
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="bg-gray-800 border-gray-700 text-white"
-              />
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="flex items-center space-x-2 mt-6"
-            >
-              <Checkbox
-                id="terms"
-                checked={checked}
-                onCheckedChange={() => setChecked(!checked)}
-                className="border-white"
-              />
-              <label
-                htmlFor="terms"
-                className="text-sm text-gray-400 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                I agree to the <span className="text-white">Terms of Service</span>
-              </label>
-            </motion.div>
-            <Button
-              onClick={() => setIsSetupComplete(true)}
-              disabled={!password || password !== confirmPassword || !checked}
-              className="w-full mt-6 bg-white text-gray-900 hover:bg-gray-200"
-            >
-              Finish
-            </Button>
-          </>
+          <Suspense>
+            <PasswordSetup
+              confirmPassword={confirmPassword}
+              setChecked={setChecked}
+              setConfirmPassword={setConfirmPassword}
+              setIsSetupComplete={setIsSetupComplete}
+              password={password}
+              setPassword={setPassword}
+              checked={checked}
+            />
+          </Suspense>
         ),
       },
     ],

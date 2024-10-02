@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { defineConfig } from 'vite';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
   plugins: [
@@ -32,6 +33,12 @@ export default defineConfig({
           tailwindMerge: ['tailwind-merge'],
         },
       },
+      plugins: [
+        visualizer({
+          filename: './stats/build-stats.html',
+          open: true,
+        }),
+      ],
     },
     outDir: 'dist',
   },

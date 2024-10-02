@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Lock, Twitter, MessageCircle } from 'lucide-react';
 
-export function SetupComplete() {
+function SetupComplete() {
   const handleButtonClick = () => {
     window.close();
   };
@@ -85,3 +85,5 @@ export function SetupComplete() {
     </div>
   );
 }
+
+export default SetupComplete;

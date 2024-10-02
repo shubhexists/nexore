@@ -2,6 +2,7 @@ import path from 'path';
 import react from '@vitejs/plugin-react';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { defineConfig } from 'vite';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
   plugins: [react(), nodePolyfills()],
@@ -29,6 +30,12 @@ export default defineConfig({
           tailwindMerge: ['tailwind-merge'],
         },
       },
+      plugins: [
+        visualizer({
+          filename: '../stats/options-build-stats.html',
+          open: true,
+        }),
+      ],
     },
     outDir: 'dist',
   },

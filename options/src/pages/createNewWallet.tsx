@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { AlertTriangle, Lock, Copy } from 'lucide-react';
-import { SetupComplete } from '@/components/finalScreen';
 import { PersistentStorage, IS_FIRST_TIME, BIP39, HDKeys, PBKDF2, KEYRING_STORE } from '@/shared';
+import React from 'react';
+
+const SlideOne = React.lazy(() => import('@/components/_createNewWallet/slideOne'));
+const SlideTwo = React.lazy(() => import('@/components/_createNewWallet/slideTwo'));
+const SlideThree = React.lazy(() => import('@/components/_createNewWallet/slideThree'));
+
+const SetupComplete = React.lazy(() => import('@/components/finalScreen'));
 
 export function CreateNewComponent() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -54,210 +55,44 @@ export function CreateNewComponent() {
     {
       title: 'Create a password',
       content: (
-        <>
-          <motion.p
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-center text-sm text-gray-400 mb-6"
-          >
-            You will use this to unlock your wallet.
-          </motion.p>
-          <motion.div
-            className="space-y-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white"
-            />
-            <Input
-              type="password"
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white"
-            />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="flex items-center space-x-2 mt-6"
-          >
-            <Checkbox
-              id="terms"
-              checked={termsAccepted}
-              onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
-              className="border-white"
-            />
-            <label
-              htmlFor="terms"
-              className="text-sm text-gray-400 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              I agree to the <span className="text-white">Terms of Service</span>
-            </label>
-          </motion.div>
-          <Button
-            onClick={() => setCurrentSlide(1)}
-            disabled={password !== confirmPassword || password.length === 0 || !termsAccepted}
-            className="w-full mt-6 bg-white text-gray-900 hover:bg-gray-200"
-          >
-            Continue
-          </Button>
-        </>
+        <Suspense fallback={<div>Loading Slide 1...</div>}>
+          <SlideOne
+            password={password}
+            setPassword={setPassword}
+            confirmPassword={confirmPassword}
+            setConfirmPassword={setConfirmPassword}
+            termsAccepted={termsAccepted}
+            setTermsAccepted={setTermsAccepted}
+            setCurrentSlide={setCurrentSlide}
+          />
+        </Suspense>
       ),
     },
     {
       title: 'Secret Recovery Phrase Warning',
       content: (
-        <>
-          <motion.p
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-center text-sm text-gray-400 mb-6"
-          >
-            On the next page, you will receive your secret recovery phrase.
-          </motion.p>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <Card className="mb-4 bg-gray-800 border-gray-700">
-              <CardContent className="flex items-center p-4">
-                <AlertTriangle className="text-red-500 mr-2" />
-                <p className="text-sm text-white">
-                  This is the <strong>ONLY</strong> way to recover your account if you lose access to your device or
-                  password.
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-            <Card className="bg-gray-800 border-gray-700">
-              <CardContent className="flex items-center p-4">
-                <Lock className="text-white mr-2" />
-                <p className="text-sm text-white">
-                  Write it down, store it in a safe place, and NEVER share it with anyone.
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="flex items-center space-x-2 mt-6"
-          >
-            <Checkbox
-              id="understand"
-              checked={phraseWarningAcknowledged}
-              onCheckedChange={(checked) => setPhraseWarningAcknowledged(checked as boolean)}
-              className="border-white"
-            />
-            <label
-              htmlFor="understand"
-              className="text-sm text-gray-400 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              I understand that I am responsible for saving my secret recovery phrase, and that it is the only way to
-              recover my wallet.
-            </label>
-          </motion.div>
-          <Button
-            onClick={() => setCurrentSlide(2)}
-            disabled={!phraseWarningAcknowledged}
-            className="w-full mt-6 bg-white text-gray-900 hover:bg-gray-200"
-          >
-            Show Secret Recovery Phrase
-          </Button>
-        </>
+        <Suspense fallback={<div>Loading Slide 2...</div>}>
+          <SlideTwo
+            phraseWarningAcknowledged={phraseWarningAcknowledged}
+            setPhraseWarningAcknowledged={setPhraseWarningAcknowledged}
+            setCurrentSlide={setCurrentSlide}
+          />
+        </Suspense>
       ),
     },
     {
       title: 'Secret Recovery Phrase',
       content: (
-        <>
-          <motion.p
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-center text-sm text-gray-400 mb-6"
-          >
-            Save these words in a safe place.
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <Card onClick={handleCopy} className="relative bg-gray-800 border-gray-700 mb-6 cursor-pointer">
-              <CardContent className="grid grid-cols-3 gap-2 p-4">
-                {mnemonic.map((word, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 + index * 0.05 }}
-                    className="flex items-center space-x-2"
-                  >
-                    <span className="text-gray-400">{index + 1}</span>
-                    <span className="text-white">{word}</span>
-                  </motion.div>
-                ))}
-              </CardContent>
-              <AnimatePresence>
-                {copied && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    className="absolute inset-0 flex items-center justify-center bg-gray-700 bg-opacity-90 rounded"
-                  >
-                    <p className="text-white font-semibold">Copied!</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </Card>
-          </motion.div>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="text-center text-xs text-gray-400 flex items-center justify-center"
-          >
-            <Copy className="w-4 h-4 mr-1" />
-            Click anywhere on this card to copy
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9 }}
-            className="flex items-center space-x-2 mt-6"
-          >
-            <Checkbox
-              id="saved"
-              checked={phraseSaved}
-              onCheckedChange={(checked) => setPhraseSaved(checked as boolean)}
-              className="border-white"
-            />
-            <label
-              htmlFor="saved"
-              className="text-sm text-gray-400 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              I saved my secret recovery phrase
-            </label>
-          </motion.div>
-          <Button
-            onClick={handleFinish}
-            disabled={!phraseSaved}
-            className="w-full mt-6 bg-white text-gray-900 hover:bg-gray-200"
-          >
-            Finish
-          </Button>
-        </>
+        <Suspense fallback={<div>Loading Slide 3...</div>}>
+          <SlideThree
+            mnemonic={mnemonic}
+            handleCopy={handleCopy}
+            copied={copied}
+            phraseSaved={phraseSaved}
+            setPhraseSaved={setPhraseSaved}
+            handleFinish={handleFinish}
+          />
+        </Suspense>
       ),
     },
   ];

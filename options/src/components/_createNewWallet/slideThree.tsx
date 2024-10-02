@@ -79,7 +79,7 @@ const SlideThree: React.FC<SlideThreeProps> = ({
         <Checkbox
           id="saved"
           checked={phraseSaved}
-          onCheckedChange={(checked) => setPhraseSaved(checked as boolean)}
+          onCheckedChange={(checked: boolean) => setPhraseSaved(checked as boolean)}
           className="border-white"
         />
         <label

@@ -55,7 +55,7 @@ const SlideTwo: React.FC<SlideTwoProps> = ({
         <Checkbox
           id="understand"
           checked={phraseWarningAcknowledged}
-          onCheckedChange={(checked) => setPhraseWarningAcknowledged(checked as boolean)}
+          onCheckedChange={(checked: boolean) => setPhraseWarningAcknowledged(checked as boolean)}
           className="border-white"
         />
         <label

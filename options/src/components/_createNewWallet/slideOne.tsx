@@ -57,7 +57,7 @@ const SlideOne: React.FC<SlideOneProps> = ({
         <Checkbox
           id="terms"
           checked={termsAccepted}
-          onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+          onCheckedChange={(checked: boolean) => setTermsAccepted(checked as boolean)}
           className="border-white"
         />
         <label

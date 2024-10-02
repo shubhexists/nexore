@@ -11,3 +11,5 @@ cp options/dist/index.html dist/contents.html
 cp -r options/dist/assets/* dist/assets/
 
 rsync -av --exclude='assets' --exclude='index.html' options/dist/ dist/
+
+rm -rf ./options/dist

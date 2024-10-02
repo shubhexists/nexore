@@ -11,6 +11,25 @@ export default defineConfig({
     },
   },
   build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          framerMotion: ['framer-motion'],
+          radixUI: [
+            '@radix-ui/react-checkbox',
+            '@radix-ui/react-icons',
+            '@radix-ui/react-label',
+            '@radix-ui/react-select',
+            '@radix-ui/react-slot',
+            '@radix-ui/react-switch',
+          ],
+          lucide: ['lucide-react'],
+          bip39: ['bip39'],
+          tailwindMerge: ['tailwind-merge'],
+        },
+      },
+    },
     outDir: 'dist',
   },
 });

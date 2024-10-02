@@ -17,6 +17,7 @@ import {
   TrendingUp,
   Circle as SwapHorizontal,
   Edit,
+  Copy,
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,7 +28,18 @@ export default function Component() {
   const [activeTab, setActiveTab] = useState('wallet');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const accounts = ['Main Wallet', 'Trading Wallet', 'Savings Wallet', 'NFT Wallet'];
+  const [hoveredAccount, setHoveredAccount] = useState<{ name: string; publicKey: string } | null>(null);
+
+  const accounts = [
+    { name: 'Main Wallet', publicKey: '0x1234...5678' },
+    { name: 'Trading Wallet', publicKey: '0x2345...6789' },
+    { name: 'Savings Wallet', publicKey: '0x3456...7890' },
+    { name: 'NFT Wallet', publicKey: '0x4567...8901' },
+    { name: 'Main Wallet', publicKey: '0x1234...5678' },
+    { name: 'Trading Wallet', publicKey: '0x2345...6789' },
+    { name: 'Savings Wallet', publicKey: '0x3456...7890' },
+    { name: 'NFT Wallet', publicKey: '0x4567...8901' },
+  ];
   const [balance, setBalance] = useState({ usd: 1234.56, sol: 12.5 });
 
   useEffect(() => {
@@ -46,7 +58,7 @@ export default function Component() {
 
   const bgColor = isDarkMode ? 'bg-gray-900' : 'bg-gray-50';
   const textColor = isDarkMode ? 'text-white' : 'text-gray-900';
-  const accentColor = isDarkMode ? 'bg-blue-600' : 'bg-blue-500';
+  const accentColor = 'bg-red-500';
   const secondaryBgColor = isDarkMode ? 'bg-gray-800' : 'bg-white';
 
   return (
@@ -56,7 +68,7 @@ export default function Component() {
       <header
         className={`${accentColor} p-6 flex justify-between items-start rounded-b-3xl shadow-lg relative overflow-hidden`}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-600 opacity-50"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-red-400 to-red-600 opacity-50"></div>
         <Button
           variant="ghost"
           className="text-white hover:bg-white/10 p-1 rounded-full transition-colors duration-300 z-10"
@@ -71,7 +83,7 @@ export default function Component() {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-4xl font-bold text-white">${balance.usd.toFixed(2)}</h2>
-          <p className="text-sm text-blue-100 mt-1">{balance.sol.toFixed(2)} SOL</p>
+          <p className="text-sm text-red-100 mt-1">{balance.sol.toFixed(2)} SOL</p>
         </motion.div>
         <Button
           variant="ghost"
@@ -140,64 +152,43 @@ export default function Component() {
             isDarkMode ? 'bg-black' : 'bg-white'
           } ${textColor} p-0 w-[80px] shadow-lg transition-transform duration-300 ease-in-out transform ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } overflow-visible`}
+          }`}
         >
           <div className="flex flex-col h-full justify-between py-4 px-2">
-            {/* Scrollable Accounts List without Scrollbar */}
             <div className="flex-grow overflow-y-auto space-y-4 relative scrollbar-none">
-              {' '}
-              {/* Hide scrollbar */}
               {accounts.map((account, index) => (
                 <motion.div
-                  key={account}
+                  key={account.name}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
-                  className="flex flex-col items-center justify-center relative group"
+                  className="flex flex-col items-center justify-center relative"
+                  onMouseEnter={() => setHoveredAccount(account)}
+                  onMouseLeave={() => setHoveredAccount(null)}
                 >
                   <Button
                     variant="ghost"
                     className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-                      activeAccount === account
+                      activeAccount === account.name
                         ? 'bg-purple-500 text-white'
                         : isDarkMode
                           ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                           : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                     }`}
                     onClick={() => {
-                      setActiveAccount(account);
+                      setActiveAccount(account.name);
                       setIsSidebarOpen(false);
                     }}
                   >
-                    {account[0]}
+                    {account.name[0]}
                   </Button>
-                  <span className="mt-1 text-xs text-center truncate w-full">{account}</span>
-
-                  {/* Hover Popup with Account Info outside the Sheet */}
-                  <div className="absolute left-[90px] top-0 z-50 hidden group-hover:flex flex-col w-[200px] bg-gray-900 text-white p-4 rounded-lg shadow-lg">
-                    <span className="font-bold mb-2">{account}</span>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Solana</span>
-                      <span className="text-sm">0 SOL</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Ethereum</span>
-                      <span className="text-sm">0 ETH</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Polygon</span>
-                      <span className="text-sm">0 MATIC</span>
-                    </div>
-                    {/* Add more account details as needed */}
-                  </div>
+                  <span className="mt-1 text-xs text-center truncate w-full">{account.name}</span>
                 </motion.div>
               ))}
             </div>
 
-            {/* Separator Line */}
             <hr className="my-4 border-gray-300" />
 
-            {/* Bottom Buttons in Column Layout with Close Gap */}
             <div className="flex flex-col space-y-2 items-center">
               <Button
                 variant="ghost"
@@ -221,6 +212,32 @@ export default function Component() {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Account Info Popup */}
+      <AnimatePresence>
+        {hoveredAccount && (
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            className="absolute left-[90px] top-1/2 transform -translate-y-1/2 z-50 flex flex-col w-[200px] bg-gray-900 text-white p-4 rounded-lg shadow-lg"
+          >
+            <span className="font-bold mb-2">{hoveredAccount.name}</span>
+            <div className="flex items-center justify-between">
+              <span className="text-sm truncate mr-2">{hoveredAccount.publicKey}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-1 hover:bg-gray-700 rounded"
+                onClick={() => navigator.clipboard.writeText(hoveredAccount.publicKey)}
+              >
+                <Copy className="h-4 w-4" />
+                <span className="sr-only">Copy public key</span>
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

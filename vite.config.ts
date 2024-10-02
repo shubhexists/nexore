@@ -22,6 +22,16 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'src/html/index.html'),
       },
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          framerMotion: ['framer-motion'],
+          radixUI: ['@radix-ui/react-icons', '@radix-ui/react-slot'],
+          lucide: ['lucide-react'],
+          bip39: ['bip39'],
+          tailwindMerge: ['tailwind-merge'],
+        },
+      },
     },
     outDir: 'dist',
   },

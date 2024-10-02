@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { AlertTriangle, Lock, Copy } from 'lucide-react';
 import { SetupComplete } from '@/components/finalScreen';
-import { PersistentStorage, IS_FIRST_TIME, BIP39, HDKeys } from '@/shared';
+import { PersistentStorage, IS_FIRST_TIME, BIP39, HDKeys, PBKDF2, KEYRING_STORE } from '@/shared';
 
 export function CreateNewComponent() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -37,11 +37,15 @@ export function CreateNewComponent() {
   };
 
   const handleFinish = async () => {
-    await new PersistentStorage<boolean>().setItem(IS_FIRST_TIME, false);
     const seedBuffer = new BIP39().mnemonicToSeed(mnemonic.join(' '));
     const ethKey = new HDKeys(seedBuffer, ethPath).generateEthereumPublicKey();
     const polKey = new HDKeys(seedBuffer, polPath).generatePolygonPublicKey();
     const solKey = new HDKeys(seedBuffer, solPath).generateSolanaPublicKey();
+    const crypto = new PBKDF2.PBKDF2Crypto();
+    const textMnemonic = mnemonic.join(' ');
+    const cipherText = await crypto.encrypt(password, textMnemonic);
+    await new PersistentStorage<PBKDF2.EncryptedData>().setItem(KEYRING_STORE, cipherText);
+    await new PersistentStorage<boolean>().setItem(IS_FIRST_TIME, false);
     console.log(ethKey, solKey, polKey);
     setIsSetupComplete(true);
   };

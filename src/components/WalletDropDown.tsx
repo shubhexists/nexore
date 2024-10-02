@@ -3,9 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Copy, Check } from 'lucide-react';
-import { WalletInfo } from '@/@types';
 
-const wallets: WalletInfo[] = [
+const wallets = [
   { name: 'Solana', icon: '◎', address: 'epG7...2Pzw' },
   { name: 'Ethereum', icon: 'Ξ', address: '0x6870...d19A' },
   { name: 'Polygon', icon: '⏣', address: '0x6870...d19P' },

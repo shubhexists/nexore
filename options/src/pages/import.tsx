@@ -139,7 +139,7 @@ export function ImportComponent() {
   const handleImport = useCallback(() => {
     const seed = bip.mnemonicToSeed(recoveryPhrase.join(' '));
     console.log(seed);
-    setCurrentSlide((prevSlide) => prevSlide + 1); // Update this part to use the previous state
+    setCurrentSlide((prevSlide) => prevSlide + 1);
   }, [recoveryPhrase]);
 
   useEffect(() => {
@@ -220,7 +220,11 @@ export function ImportComponent() {
         title: 'Import Wallets',
         content: (
           <Suspense>
-            <ImportWallets currentSlide={currentSlide} setCurrentSlide={setCurrentSlide} />
+            <ImportWallets
+              currentSlide={currentSlide}
+              setCurrentSlide={setCurrentSlide}
+              recoveryPhase={recoveryPhrase}
+            />
           </Suspense>
         ),
       },

@@ -10,6 +10,7 @@ import {
   DEFAULT_LOCK,
   CURRENT_ACCOUNT_METADATA,
   PRIVATE_KEYRING_STORE,
+  PATH_GAP,
 } from '../../../shared/constants/constants';
 import { HDKeys } from '../../../shared/services/HDKey/HDKey';
 import * as Utils from '../../../shared/services/utils';
@@ -29,6 +30,7 @@ export {
   PolygonMainnet,
   EthMainNet,
   NOT_HAS_CIPHER,
+  PATH_GAP,
   HDKeys,
   ACCOUNT_METADATA,
   DEFAULT_LOCK,

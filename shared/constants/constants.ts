@@ -8,3 +8,4 @@ export const CURRENT_ACCOUNT_METADATA = 'CURRENT_ACCOUNT_METADATA';
 
 export const DEFAULT_LOCK = 600_000;
 export const PBKDF2_ITERATIONS = 600_000;
+export const PATH_GAP = 20;

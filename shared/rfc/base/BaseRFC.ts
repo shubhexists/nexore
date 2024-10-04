@@ -5,7 +5,7 @@ export class AlchemyBase {
 
   constructor(network: Networks) {
     const base = network;
-    const ALCHEMY_API_KEY = process.env.ALCHEMY_API;
+    const ALCHEMY_API_KEY = import.meta.env.VITE_ALCHEMY_API;
     const base_with_key = `${base}${ALCHEMY_API_KEY}`;
     this.baseUrl = base_with_key;
   }

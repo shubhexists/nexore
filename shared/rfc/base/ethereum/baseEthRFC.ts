@@ -1,13 +1,14 @@
 import { Networks } from '../../constants';
 import { makeRpcCall } from '../../utils';
 import { AlchemyBase } from '../BaseRFC';
+import { EthereumGetBalanceResponse } from './types';
 
 export class EthMainNet extends AlchemyBase {
   constructor() {
     super(Networks.EthMainNet);
   }
 
-  async getAccountInfo(address: string) {
+  async getBalance(address: string) {
     const method = 'eth_getBalance';
     const params = {
       id: 1,
@@ -15,6 +16,16 @@ export class EthMainNet extends AlchemyBase {
       params: [address, 'latest'],
       method,
     };
-    return await makeRpcCall(this.baseUrl, method, params);
+
+    try {
+      const result = (await makeRpcCall(this.baseUrl, method, params)) as EthereumGetBalanceResponse;
+
+      if (result?.result) {
+        return BigInt(result.result).toString();
+      }
+    } catch (error) {
+      console.error(`Failed to get balance for address ${address}:`, error);
+    }
+    return '0';
   }
 }

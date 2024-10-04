@@ -1,6 +1,7 @@
 import { Networks } from '../../constants';
 import { makeRpcCall } from '../../utils';
 import { AlchemyBase } from '../BaseRFC';
+import { SolanaGetBalanceResponse } from './types';
 
 export class SolanaDevnet extends AlchemyBase {
   constructor() {
@@ -15,6 +16,17 @@ export class SolanaDevnet extends AlchemyBase {
       params: [address],
       method,
     };
-    return await makeRpcCall(this.baseUrl, method, params);
+
+    try {
+      const result = (await makeRpcCall(this.baseUrl, method, params)) as SolanaGetBalanceResponse;
+
+      if (result?.result?.value !== undefined) {
+        return result.result.value.toString();
+      }
+    } catch (error) {
+      console.error(`Failed to get balance for address ${address}:`, error);
+    }
+
+    return '0';
   }
 }

@@ -1,7 +1,20 @@
 import { Suspense, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PersistentStorage, IS_FIRST_TIME, BIP39, HDKeys, PBKDF2, KEYRING_STORE } from '@/shared';
+import {
+  PersistentStorage,
+  NOT_HAS_CIPHER,
+  BIP39,
+  HDKeys,
+  PBKDF2,
+  KEYRING_STORE,
+  AccountType,
+  ACCOUNT_METADATA,
+  CURRENT_ACCOUNT_METADATA,
+  RFC_URL,
+  DEFAULT_LOCK,
+} from '@/shared';
 import React from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 const SlideOne = React.lazy(() => import('@/components/_createNewWallet/slideOne'));
 const SlideTwo = React.lazy(() => import('@/components/_createNewWallet/slideTwo'));
@@ -44,10 +57,68 @@ export function CreateNewComponent() {
     const solKey = new HDKeys(seedBuffer, solPath).generateSolanaPublicKey();
     const crypto = new PBKDF2.PBKDF2Crypto();
     const textMnemonic = mnemonic.join(' ');
+    const baseAccountId = uuidv4();
     const cipherText = await crypto.encrypt(password, textMnemonic);
     await new PersistentStorage<PBKDF2.EncryptedData>().setItem(KEYRING_STORE, cipherText);
-    await new PersistentStorage<boolean>().setItem(IS_FIRST_TIME, false);
-    console.log(ethKey, solKey, polKey);
+    await new PersistentStorage<AccountType.Nexore>().setItem(ACCOUNT_METADATA, {
+      accounts: [
+        {
+          cipher: true,
+          uuid: baseAccountId,
+          developer_mode: false,
+          account_name: 'Account 1',
+          wallets: {
+            active_networks: {
+              [AccountType.SupportedChains.ETHEREUM]: {
+                public_key: ethKey,
+                amount_in_units: '0',
+                rfc_url: RFC_URL.ETH_BASE_URL,
+              },
+              [AccountType.SupportedChains.POLYGON]: {
+                public_key: polKey,
+                amount_in_units: '0',
+                rfc_url: RFC_URL.POLYGON_MAIN_URL,
+              },
+              [AccountType.SupportedChains.SOLANA]: {
+                public_key: solKey,
+                amount_in_units: '0',
+                rfc_url: RFC_URL.SOLANA_MAIN_URL,
+              },
+            },
+          },
+        },
+      ],
+    });
+    await new PersistentStorage<AccountType.CurrentMetadata>().setItem(CURRENT_ACCOUNT_METADATA, {
+      account: {
+        cipher: true,
+        uuid: baseAccountId,
+        developer_mode: false,
+        account_name: 'Account 1',
+        wallets: {
+          active_networks: {
+            [AccountType.SupportedChains.ETHEREUM]: {
+              public_key: ethKey,
+              amount_in_units: '0',
+              rfc_url: RFC_URL.ETH_BASE_URL,
+            },
+            [AccountType.SupportedChains.POLYGON]: {
+              public_key: polKey,
+              amount_in_units: '0',
+              rfc_url: RFC_URL.POLYGON_MAIN_URL,
+            },
+            [AccountType.SupportedChains.SOLANA]: {
+              public_key: solKey,
+              amount_in_units: '0',
+              rfc_url: RFC_URL.SOLANA_MAIN_URL,
+            },
+          },
+        },
+      },
+      autolocktime: DEFAULT_LOCK,
+      theme: AccountType.Mode.DARK,
+    });
+    await new PersistentStorage<boolean>().setItem(NOT_HAS_CIPHER, false);
     setIsSetupComplete(true);
   };
 
@@ -55,7 +126,7 @@ export function CreateNewComponent() {
     {
       title: 'Create a password',
       content: (
-        <Suspense fallback={<div>Loading Slide 1...</div>}>
+        <Suspense>
           <SlideOne
             password={password}
             setPassword={setPassword}
@@ -71,7 +142,7 @@ export function CreateNewComponent() {
     {
       title: 'Secret Recovery Phrase Warning',
       content: (
-        <Suspense fallback={<div>Loading Slide 2...</div>}>
+        <Suspense>
           <SlideTwo
             phraseWarningAcknowledged={phraseWarningAcknowledged}
             setPhraseWarningAcknowledged={setPhraseWarningAcknowledged}
@@ -83,7 +154,7 @@ export function CreateNewComponent() {
     {
       title: 'Secret Recovery Phrase',
       content: (
-        <Suspense fallback={<div>Loading Slide 3...</div>}>
+        <Suspense>
           <SlideThree
             mnemonic={mnemonic}
             handleCopy={handleCopy}

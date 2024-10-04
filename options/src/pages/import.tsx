@@ -10,6 +10,7 @@ const InitialSlide = React.lazy(() => import('@/components/_importWallet/initial
 const RecoveryPhraseInput = React.lazy(() => import('@/components/_importWallet/recoveryPhase'));
 const PrivateKeyInputProps = React.lazy(() => import('@/components/_importWallet/privateKeyOne'));
 const PasswordSetup = React.lazy(() => import('@/components/_importWallet/privateKeyTwo'));
+const ImportWallets = React.lazy(() => import('@/components/_importWallet/recoveryPhaseTwo'));
 
 const SetupComplete = React.lazy(() => import('@/components/finalScreen'));
 
@@ -138,6 +139,7 @@ export function ImportComponent() {
   const handleImport = useCallback(() => {
     const seed = bip.mnemonicToSeed(recoveryPhrase.join(' '));
     console.log(seed);
+    setCurrentSlide((prevSlide) => prevSlide + 1); // Update this part to use the previous state
   }, [recoveryPhrase]);
 
   useEffect(() => {
@@ -214,6 +216,14 @@ export function ImportComponent() {
           </Suspense>
         ),
       },
+      {
+        title: 'Import Wallets',
+        content: (
+          <Suspense>
+            <ImportWallets currentSlide={currentSlide} setCurrentSlide={setCurrentSlide} />
+          </Suspense>
+        ),
+      },
     ],
     privateKey: [
       {
@@ -240,7 +250,11 @@ export function ImportComponent() {
         content: (
           <Suspense>
             <PasswordSetup
+              walletName={walletName}
+              walletAddress={walletAddress}
               confirmPassword={confirmPassword}
+              privateKey={privateKey}
+              selectedBlockchain={selectedBlockchain}
               setChecked={setChecked}
               setConfirmPassword={setConfirmPassword}
               setIsSetupComplete={setIsSetupComplete}

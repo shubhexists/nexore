@@ -1,5 +1,17 @@
 export type Account = {
-  wallets: Wallet[];
+  wallets: Wallet;
+  cipher: boolean;
+  account_name: string;
+  uuid: string;
+  developer_mode: boolean;
+};
+
+export type Nexore = {
+  accounts: Account[];
+};
+
+export type CurrentMetadata = {
+  account: Account;
   autolocktime: number;
   theme: Mode;
 };
@@ -10,9 +22,6 @@ export enum Mode {
 }
 
 export type Wallet = {
-  uuid: string;
-  account_name: string;
-  developer_mode: boolean;
   active_networks: Partial<Record<SupportedChains, ChainData>>;
 };
 
@@ -25,6 +34,20 @@ export enum SupportedChains {
 export type ChainData = {
   public_key: string;
   amount_in_units: string;
-  amount_in_dollars: string;
   rfc_url: string;
+};
+
+export type PrivateKeyRingStoreType = {
+  keys: PrivKeys[];
+};
+
+export type PrivKeys = {
+  id: string;
+  ciphertext: string;
+  iv: string;
+  salt: string;
+  authTag: string;
+  iterations: number;
+  keyLength: number;
+  digest: string;
 };

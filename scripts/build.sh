@@ -1,4 +1,6 @@
 #!/bin/bash
+cp .env options/.env
+
 echo "Building main Vite project..."
 pnpm run build-main
 
@@ -13,3 +15,5 @@ cp -r options/dist/assets/* dist/assets/
 rsync -av --exclude='assets' --exclude='index.html' options/dist/ dist/
 
 rm -rf ./options/dist
+
+rm options/.env

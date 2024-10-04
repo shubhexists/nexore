@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -16,44 +17,58 @@ import {
   Sparkles,
   TrendingUp,
   Circle as SwapHorizontal,
-  Edit,
   Copy,
+  Pencil,
+  ChevronLeft,
+  Check,
 } from 'lucide-react';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isFirstTime } from './utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function Component() {
-  const [activeAccount, setActiveAccount] = useState('Main Wallet');
   const [activeTab, setActiveTab] = useState('wallet');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [_IsSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [hoveredAccount, setHoveredAccount] = useState<{ name: string; publicKey: string } | null>(null);
+  const [open, setOpen] = useState(false);
 
-  const accounts = [
-    { name: 'Main Wallet', publicKey: '0x1234...5678' },
-    { name: 'Trading Wallet', publicKey: '0x2345...6789' },
-    { name: 'Savings Wallet', publicKey: '0x3456...7890' },
-    { name: 'NFT Wallet', publicKey: '0x4567...8901' },
-    { name: 'Main Wallet', publicKey: '0x1234...5678' },
-    { name: 'Trading Wallet', publicKey: '0x2345...6789' },
-    { name: 'Savings Wallet', publicKey: '0x3456...7890' },
-    { name: 'NFT Wallet', publicKey: '0x4567...8901' },
+  const [balance] = useState({ usd: 1234.56, sol: 12.5 });
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  const copyToClipboard = (text: string, index: number) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const accountsw = [
+    {
+      name: 'Account 1',
+      image: '/placeholder.svg?height=40&width=40',
+      color: 'bg-green-500',
+      networks: [
+        { name: 'Solana', address: '5HSy...9kT5', icon: '☉' },
+        { name: 'Ethereum', address: '0x791E...7080', icon: 'Ξ' },
+        { name: 'Polygon', address: '0x791E...7080', icon: 'Ⓟ' },
+        { name: 'Bitcoin', address: 'bc1q...gqt8', icon: '₿' },
+      ],
+    },
+    {
+      name: 'Account 2',
+      image: '/placeholder.svg?height=40&width=40',
+      color: 'bg-purple-500',
+      networks: [
+        { name: 'Amoy', address: '0x639B...ce78', icon: 'Ⓟ' },
+        { name: 'Devnet', address: '3zyg...jGu', icon: 'Ξ' },
+      ],
+    },
   ];
-  const [balance, setBalance] = useState({ usd: 1234.56, sol: 12.5 });
 
   useEffect(() => {
     isFirstTime();
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setBalance((prev) => ({
-        usd: +(prev.usd + (Math.random() - 0.5) * 10).toFixed(2),
-        sol: +(prev.sol + (Math.random() - 0.5) * 0.1).toFixed(2),
-      }));
-    }, 5000);
-    return () => clearInterval(interval);
   }, []);
 
   const bgColor = isDarkMode ? 'bg-gray-900' : 'bg-gray-50';
@@ -69,13 +84,125 @@ export default function Component() {
         className={`${accentColor} p-6 flex justify-between items-start rounded-b-3xl shadow-lg relative overflow-hidden`}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-red-400 to-red-600 opacity-50"></div>
-        <Button
-          variant="ghost"
-          className="text-white hover:bg-white/10 p-1 rounded-full transition-colors duration-300 z-10"
-          onClick={() => setIsSidebarOpen(true)}
-        >
-          <Menu className="h-6 w-6" />
-        </Button>
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              className="text-white hover:bg-white/10 p-1 rounded-full transition-colors duration-300 z-10"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[80px] sm:w-[80px] p-0">
+            <div className="flex flex-col h-full bg-zinc-900 text-white">
+              <Button variant="ghost" className="justify-start p-4" onClick={() => setOpen(false)}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="flex-1 overflow-auto py-2">
+                {accountsw.map((account, index) => (
+                  <TooltipProvider key={account.name}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="px-4 py-2 cursor-pointer">
+                          <Avatar className={`w-10 h-10 ${account.color}`}>
+                            <AvatarImage src={account.image} alt={account.name} />
+                            <AvatarFallback>{index === 0 ? '✓' : `A${index + 1}`}</AvatarFallback>
+                          </Avatar>
+                          <div className="mt-1 text-xs text-center">{account.name}</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="right"
+                        align="start"
+                        sideOffset={5}
+                        className="w-64 p-0 bg-[#1c1c1c] border-gray-700 text-white relative"
+                      >
+                        <motion.div
+                          className="absolute left-0 top-4 -ml-[9px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[9px] border-r-[#1c1c1c]"
+                          initial={{ opacity: 0, scale: 0.5 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.2 }}
+                        />
+                        <motion.div
+                          className="p-4 space-y-4"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium">{account.name}</span>
+                            <span className="text-xs text-gray-400">$0.00</span>
+                          </div>
+                          {account.networks.map((network, networkIndex) => (
+                            <motion.div
+                              key={network.name}
+                              className="flex items-center justify-between"
+                              onHoverStart={() => setHoveredIndex(networkIndex)}
+                              onHoverEnd={() => setHoveredIndex(null)}
+                              whileHover={{ scale: 1.05 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <div className="flex items-center space-x-2">
+                                <span className="text-lg">{network.icon}</span>
+                                <motion.span
+                                  className={`text-sm ${hoveredIndex === networkIndex ? 'text-primary' : 'text-white'}`}
+                                  animate={{ color: hoveredIndex === networkIndex ? '#10b981' : '#ffffff' }}
+                                >
+                                  {network.name}
+                                </motion.span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <motion.span
+                                  className={`text-xs ${hoveredIndex === networkIndex ? 'text-primary' : 'text-gray-400'}`}
+                                  animate={{ color: hoveredIndex === networkIndex ? '#10b981' : '#9ca3af' }}
+                                >
+                                  {network.address}
+                                </motion.span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 hover:bg-transparent"
+                                  onClick={() => copyToClipboard(network.address, networkIndex)}
+                                >
+                                  <motion.div
+                                    initial={false}
+                                    animate={{ scale: copiedIndex === networkIndex ? [1, 1.2, 1] : 1 }}
+                                    transition={{ duration: 0.2 }}
+                                  >
+                                    {copiedIndex === networkIndex ? (
+                                      <Check className="h-3 w-3 text-green-500" />
+                                    ) : (
+                                      <Copy className="h-3 w-3 text-gray-400" />
+                                    )}
+                                  </motion.div>
+                                </Button>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ))}
+              </div>
+              <div className="p-4 flex flex-col space-y-2">
+                <Button variant="ghost" size="sm" className="w-full justify-start">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add
+                </Button>
+                <Button variant="ghost" size="sm" className="w-full justify-start">
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+                <Button variant="ghost" size="sm" className="w-full justify-start">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Button>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
         <motion.div
           className="text-center z-10"
           initial={{ opacity: 0, y: -20 }}
@@ -144,100 +271,6 @@ export default function Component() {
           isDarkMode={isDarkMode}
         />
       </nav>
-
-      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetContent
-          side="left"
-          className={`${
-            isDarkMode ? 'bg-black' : 'bg-white'
-          } ${textColor} p-0 w-[80px] shadow-lg transition-transform duration-300 ease-in-out transform ${
-            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
-        >
-          <div className="flex flex-col h-full justify-between py-4 px-2">
-            <div className="flex-grow overflow-y-auto space-y-4 relative scrollbar-none">
-              {accounts.map((account, index) => (
-                <motion.div
-                  key={account.name}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                  className="flex flex-col items-center justify-center relative"
-                  onMouseEnter={() => setHoveredAccount(account)}
-                  onMouseLeave={() => setHoveredAccount(null)}
-                >
-                  <Button
-                    variant="ghost"
-                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-                      activeAccount === account.name
-                        ? 'bg-purple-500 text-white'
-                        : isDarkMode
-                          ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                    }`}
-                    onClick={() => {
-                      setActiveAccount(account.name);
-                      setIsSidebarOpen(false);
-                    }}
-                  >
-                    {account.name[0]}
-                  </Button>
-                  <span className="mt-1 text-xs text-center truncate w-full">{account.name}</span>
-                </motion.div>
-              ))}
-            </div>
-
-            <hr className="my-4 border-gray-300" />
-
-            <div className="flex flex-col space-y-2 items-center">
-              <Button
-                variant="ghost"
-                className="w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-100"
-              >
-                <Plus className="h-6 w-6 text-gray-600" />
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-100"
-              >
-                <Edit className="h-6 w-6 text-gray-600" />
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-100"
-              >
-                <Settings className="h-6 w-6 text-gray-600" />
-              </Button>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* Account Info Popup */}
-      <AnimatePresence>
-        {hoveredAccount && (
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            className="absolute left-[90px] top-1/2 transform -translate-y-1/2 z-50 flex flex-col w-[200px] bg-gray-900 text-white p-4 rounded-lg shadow-lg"
-          >
-            <span className="font-bold mb-2">{hoveredAccount.name}</span>
-            <div className="flex items-center justify-between">
-              <span className="text-sm truncate mr-2">{hoveredAccount.publicKey}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="p-1 hover:bg-gray-700 rounded"
-                onClick={() => navigator.clipboard.writeText(hoveredAccount.publicKey)}
-              >
-                <Copy className="h-4 w-4" />
-                <span className="sr-only">Copy public key</span>
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

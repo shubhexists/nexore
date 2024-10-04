@@ -1,11 +1,11 @@
-import { IS_FIRST_TIME, PersistentStorage } from '@/shared';
+import { NOT_HAS_CIPHER, PersistentStorage } from '@/shared';
 
 export * from './getHeaderName';
 
 export async function isFirstTime() {
   const storage = new PersistentStorage<boolean>();
-  const isFirstTime = await storage.getItem(IS_FIRST_TIME);
-  if (typeof isFirstTime === 'undefined') {
+  const notHasCipher = await storage.getItem(NOT_HAS_CIPHER);
+  if (typeof notHasCipher === 'undefined') {
     chrome.tabs.create({ url: 'contents.html' });
     window.close();
   }

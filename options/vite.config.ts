@@ -33,7 +33,7 @@ export default defineConfig({
       plugins: [
         visualizer({
           filename: '../stats/options-build-stats.html',
-          open: true,
+          open: false,
         }),
       ],
     },

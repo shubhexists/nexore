@@ -8,6 +8,7 @@ import { BIP39, EthMainNet, HDKeys, PolygonMainnet, SolanaMainnet } from '@/shar
 
 interface FundedWallet {
   key: string;
+  derKey: string;
   balance: string;
 }
 
@@ -21,8 +22,8 @@ interface ImportWalletsInputProps {
   recoveryPhase: string[];
   currentSlide: number;
   setCurrentSlide: (slide: number) => void;
-  derKey: string;
-  setDerKey: (value: string) => void;
+  derKey: { solana: string; ethereum: string; polygon: string };
+  setDerKey: (value: { solana: string; ethereum: string; polygon: string }) => void;
 }
 
 const ImportWallets: FC<ImportWalletsInputProps> = ({
@@ -34,8 +35,8 @@ const ImportWallets: FC<ImportWalletsInputProps> = ({
 }) => {
   const [selectedWallet, setSelectedWallet] = useState('Funded Addresses');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  // const [derKey, setDerKey] = useState<string>('');
   const [isPathValid, setIsPathValid] = useState<boolean>(false);
+  const [customDerKey, setCustomDerKey] = useState('');
   const walletOptions = ['Funded Addresses', 'Custom', 'Ledger'];
 
   function isValidDerivationPath(path: string) {
@@ -53,8 +54,14 @@ const ImportWallets: FC<ImportWalletsInputProps> = ({
 
   const handleDerivationKeyChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    setDerKey(newValue);
+    setCustomDerKey(newValue);
     setIsPathValid(isValidDerivationPath(newValue));
+
+    if (newValue.startsWith("m/44'/501")) {
+      setDerKey({ ...derKey, solana: newValue, ethereum: '', polygon: '' });
+    } else if (newValue.startsWith("m/44'/60")) {
+      setDerKey({ ...derKey, solana: '', ethereum: newValue, polygon: newValue });
+    }
   };
 
   useEffect(() => {
@@ -68,7 +75,7 @@ const ImportWallets: FC<ImportWalletsInputProps> = ({
         const solana = new SolanaMainnet();
         const bal = await solana.getBalance(solKey);
         if (bal !== '0') {
-          return { key: solKey, balance: bal };
+          return { key: solKey, balance: bal, derKey: i };
         }
         return null;
       });
@@ -78,7 +85,7 @@ const ImportWallets: FC<ImportWalletsInputProps> = ({
         const polygon = new PolygonMainnet();
         const bal = await polygon.getBalance(polKey);
         if (bal !== '0') {
-          return { key: polKey, balance: bal };
+          return { key: polKey, balance: bal, derKey: i };
         }
         return null;
       });
@@ -88,7 +95,7 @@ const ImportWallets: FC<ImportWalletsInputProps> = ({
         const ethereum = new EthMainNet();
         const bal = await ethereum.getBalance(ethKey);
         if (bal !== '0') {
-          return { key: ethKey, balance: bal };
+          return { key: ethKey, balance: bal, derKey: i };
         }
         return null;
       });
@@ -104,9 +111,9 @@ const ImportWallets: FC<ImportWalletsInputProps> = ({
       const fundedEthereum = ethereumResults.filter((result) => result !== null) as FundedWallet[];
 
       setFundedWallets((prevState) => ({
-        solana: [...prevState.solana, ...fundedSolana],
-        ethereum: [...prevState.ethereum, ...fundedEthereum],
-        polygon: [...prevState.polygon, ...fundedPolygon],
+        solana: [...prevState.solana, ...fundedSolana].slice(0, 1),
+        ethereum: [...prevState.ethereum, ...fundedEthereum].slice(0, 1),
+        polygon: [...prevState.polygon, ...fundedPolygon].slice(0, 1),
       }));
 
       setIsLoading(false);
@@ -187,7 +194,7 @@ const ImportWallets: FC<ImportWalletsInputProps> = ({
             <p className="text-lg font-semibold mb-2 text-white">Enter your Derivation Key</p>
             <input
               type="text"
-              value={derKey}
+              value={customDerKey}
               onChange={handleDerivationKeyChange}
               placeholder="Enter your derivation key"
               className="bg-gray-700 text-white p-2 rounded w-full mb-4"
@@ -215,6 +222,25 @@ const ImportWallets: FC<ImportWalletsInputProps> = ({
       default:
         return null;
     }
+  };
+
+  const handleImport = () => {
+    const newDerKey = { ...derKey };
+
+    if (selectedWallet === 'Funded Addresses') {
+      if (fundedWallets.solana.length > 0) {
+        newDerKey.solana = fundedWallets.solana[0].derKey;
+      }
+
+      if (fundedWallets.ethereum.length > 0) {
+        newDerKey.ethereum = fundedWallets.ethereum[0].derKey;
+      } else if (fundedWallets.polygon.length > 0) {
+        newDerKey.polygon = fundedWallets.polygon[0].derKey;
+      }
+    }
+
+    setDerKey(newDerKey);
+    setCurrentSlide(currentSlide + 1);
   };
 
   const isButtonDisabled = () => {
@@ -275,13 +301,13 @@ const ImportWallets: FC<ImportWalletsInputProps> = ({
       </div>
       {renderContent()}
       <Button
-        onClick={() => setCurrentSlide(currentSlide + 1)}
+        onClick={handleImport}
         className="w-full bg-white text-gray-900 hover:bg-gray-200"
         disabled={isButtonDisabled()}
       >
-        {derKey.startsWith("m/44'/501")
+        {derKey.solana
           ? 'Import Solana Wallet'
-          : derKey.startsWith("m/44'/60")
+          : derKey.ethereum || derKey.polygon
             ? 'Import ETH/POL Wallet'
             : 'Import Wallet'}
       </Button>

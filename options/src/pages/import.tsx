@@ -52,7 +52,11 @@ export function ImportComponent() {
   const [invalidWords, setInvalidWords] = useState<number[]>([]);
   const [hoveredMethod, setHoveredMethod] = useState<string | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const [derKey, setDerKey] = useState<string>('');
+  const [derKey, setDerKey] = useState<{ solana: string; ethereum: string; polygon: string }>({
+    solana: '',
+    ethereum: '',
+    polygon: '',
+  });
 
   function makeGoodInputMessage(): string {
     const sortedInvalidWords = invalidWords.sort((a, b) => a - b);

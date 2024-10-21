@@ -1,6 +1,5 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { FC, useEffect, useState } from 'react';
-import { ChevronDown, Search } from 'lucide-react';
+import { ChangeEvent, FC, useEffect, useState } from 'react';
+import { ChevronDown, Search, Wallet } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import LoadingBars from '../loadingAnimations';
@@ -22,12 +21,27 @@ interface ImportWalletsInputProps {
   recoveryPhase: string[];
   currentSlide: number;
   setCurrentSlide: (slide: number) => void;
+  derKey: string;
+  setDerKey: (value: string) => void;
 }
 
-const ImportWallets: FC<ImportWalletsInputProps> = ({ currentSlide, setCurrentSlide, recoveryPhase }) => {
+const ImportWallets: FC<ImportWalletsInputProps> = ({
+  currentSlide,
+  setCurrentSlide,
+  recoveryPhase,
+  derKey,
+  setDerKey,
+}) => {
   const [selectedWallet, setSelectedWallet] = useState('Funded Addresses');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  // const [derKey, setDerKey] = useState<string>('');
+  const [isPathValid, setIsPathValid] = useState<boolean>(false);
   const walletOptions = ['Funded Addresses', 'Custom', 'Ledger'];
+
+  function isValidDerivationPath(path: string) {
+    const derivationRegex = /^m\/44'\/(60|501)'(\/\d+'?){2,3}$/;
+    return derivationRegex.test(path);
+  }
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -37,12 +51,16 @@ const ImportWallets: FC<ImportWalletsInputProps> = ({ currentSlide, setCurrentSl
     polygon: [],
   });
 
+  const handleDerivationKeyChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setDerKey(newValue);
+    setIsPathValid(isValidDerivationPath(newValue));
+  };
+
   useEffect(() => {
     const fetchBalances = async () => {
       const solPaths = getNextSolPaths();
-      console.log(solPaths);
       const ethPolPath = getNextEthPolPaths();
-      console.log(ethPolPath);
       const seedBuffer = new BIP39().mnemonicToSeed(recoveryPhase.join(' '));
 
       const solanaPromises = solPaths.map(async (i) => {
@@ -95,9 +113,122 @@ const ImportWallets: FC<ImportWalletsInputProps> = ({ currentSlide, setCurrentSl
     };
 
     fetchBalances();
-  }, []);
+  }, [recoveryPhase]);
 
-  console.log(fundedWallets);
+  const renderWalletList = (wallets: FundedWallet[], title: string) => (
+    <div className="mb-4">
+      <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
+      {wallets.map((wallet, index) => (
+        <div key={index} className="bg-gray-700 rounded p-3 mb-2">
+          <p className="text-sm text-gray-300 break-all">{wallet.key}</p>
+          <p className="text-sm text-green-400">Balance: {wallet.balance}</p>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="p-6 rounded flex flex-col items-center justify-center mb-6"
+        >
+          <LoadingBars size={45} />
+        </motion.div>
+      );
+    }
+
+    switch (selectedWallet) {
+      case 'Funded Addresses':
+        if (
+          fundedWallets.solana.length === 0 &&
+          fundedWallets.ethereum.length === 0 &&
+          fundedWallets.polygon.length === 0
+        ) {
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="bg-gray-800 border border-gray-700 p-6 rounded flex flex-col items-center justify-center mb-6"
+            >
+              <Search className="w-8 h-8 text-gray-400 mb-4" />
+              <p className="text-lg font-semibold mb-2 text-white">No funded wallets found</p>
+              <p className="text-sm text-gray-400 text-center">
+                Please select a derivation path from the menu to import your wallets or refresh this page to create a
+                new Wallet.
+              </p>
+            </motion.div>
+          );
+        }
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-gray-800 border border-gray-700 p-6 rounded mb-6"
+          >
+            {fundedWallets.solana.length > 0 && renderWalletList(fundedWallets.solana, 'Solana Wallets')}
+            {fundedWallets.ethereum.length > 0 && renderWalletList(fundedWallets.ethereum, 'Ethereum Wallets')}
+            {fundedWallets.polygon.length > 0 && renderWalletList(fundedWallets.polygon, 'Polygon Wallets')}
+          </motion.div>
+        );
+      case 'Custom':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-gray-800 border border-gray-700 p-6 rounded flex flex-col items-center justify-center mb-6"
+          >
+            <p className="text-lg font-semibold mb-2 text-white">Enter your Derivation Key</p>
+            <input
+              type="text"
+              value={derKey}
+              onChange={handleDerivationKeyChange}
+              placeholder="Enter your derivation key"
+              className="bg-gray-700 text-white p-2 rounded w-full mb-4"
+            />
+            <p className="text-sm text-gray-400 text-center">
+              Please enter your derivation key to proceed with the setup.
+            </p>
+          </motion.div>
+        );
+      case 'Ledger':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-gray-800 border border-gray-700 p-6 rounded flex flex-col items-center justify-center mb-6"
+          >
+            <Wallet className="w-8 h-8 text-gray-400 mb-4" />
+            <p className="text-lg font-semibold mb-2 text-white">Ledger Hardware Wallet</p>
+            <p className="text-sm text-gray-400 text-center">
+              Feature coming soon. You'll be able to connect and import wallets from your Ledger device.
+            </p>
+          </motion.div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const isButtonDisabled = () => {
+    if (selectedWallet === 'Funded Addresses') {
+      return (
+        fundedWallets.solana.length === 0 && fundedWallets.ethereum.length === 0 && fundedWallets.polygon.length === 0
+      );
+    } else if (selectedWallet === 'Custom') {
+      return !isPathValid;
+    } else if (selectedWallet === 'Ledger') {
+      return true;
+    }
+    return false;
+  };
 
   return (
     <div className="w-full max-w-sm mx-auto">
@@ -107,8 +238,9 @@ const ImportWallets: FC<ImportWalletsInputProps> = ({ currentSlide, setCurrentSl
         <motion.button
           whileHover={{ backgroundColor: 'rgba(31, 41, 55, 1)' }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          onClick={() => !isLoading && setIsDropdownOpen(!isDropdownOpen)}
           className="w-full bg-gray-800 border border-gray-700 p-2 rounded flex justify-between items-center text-left text-white"
+          style={{ cursor: isLoading ? 'not-allowed' : 'pointer' }}
         >
           {selectedWallet}
           <motion.div animate={{ rotate: isDropdownOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
@@ -116,7 +248,7 @@ const ImportWallets: FC<ImportWalletsInputProps> = ({ currentSlide, setCurrentSl
           </motion.div>
         </motion.button>
         <AnimatePresence>
-          {isDropdownOpen && (
+          {!isLoading && isDropdownOpen && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -141,38 +273,17 @@ const ImportWallets: FC<ImportWalletsInputProps> = ({ currentSlide, setCurrentSl
           )}
         </AnimatePresence>
       </div>
-
-      {isLoading ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="p-6 rounded flex flex-col items-center justify-center mb-6"
-        >
-          <LoadingBars size={45} />
-        </motion.div>
-      ) : (
-        <div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="bg-gray-800 border border-gray-700 p-6 rounded flex flex-col items-center justify-center mb-6"
-          >
-            <Search className="w-8 h-8 text-gray-400 mb-4" />
-            <p className="text-lg font-semibold mb-2 text-white">No funded wallets found</p>
-            <p className="text-sm text-gray-400 text-center">
-              Please select a derivation path from the menu to import your wallets.
-            </p>
-          </motion.div>
-        </div>
-      )}
-
+      {renderContent()}
       <Button
         onClick={() => setCurrentSlide(currentSlide + 1)}
         className="w-full bg-white text-gray-900 hover:bg-gray-200"
+        disabled={isButtonDisabled()}
       >
-        Import Wallet
+        {derKey.startsWith("m/44'/501")
+          ? 'Import Solana Wallet'
+          : derKey.startsWith("m/44'/60")
+            ? 'Import ETH/POL Wallet'
+            : 'Import Wallet'}
       </Button>
     </div>
   );

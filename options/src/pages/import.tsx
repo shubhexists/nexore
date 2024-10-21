@@ -11,6 +11,7 @@ const RecoveryPhraseInput = React.lazy(() => import('@/components/_importWallet/
 const PrivateKeyInputProps = React.lazy(() => import('@/components/_importWallet/privateKeyOne'));
 const PasswordSetup = React.lazy(() => import('@/components/_importWallet/privateKeyTwo'));
 const ImportWallets = React.lazy(() => import('@/components/_importWallet/recoveryPhaseTwo'));
+const PhasePasswordSetup = React.lazy(() => import('@/components/_importWallet/recoveryPhaseThree'));
 
 const SetupComplete = React.lazy(() => import('@/components/finalScreen'));
 
@@ -51,6 +52,7 @@ export function ImportComponent() {
   const [invalidWords, setInvalidWords] = useState<number[]>([]);
   const [hoveredMethod, setHoveredMethod] = useState<string | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [derKey, setDerKey] = useState<string>('');
 
   function makeGoodInputMessage(): string {
     const sortedInvalidWords = invalidWords.sort((a, b) => a - b);
@@ -221,9 +223,29 @@ export function ImportComponent() {
         content: (
           <Suspense>
             <ImportWallets
+              derKey={derKey}
+              setDerKey={setDerKey}
               currentSlide={currentSlide}
               setCurrentSlide={setCurrentSlide}
               recoveryPhase={recoveryPhrase}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        title: 'Create a password',
+        content: (
+          <Suspense>
+            <PhasePasswordSetup
+              derivationKey={derKey}
+              confirmPassword={confirmPassword}
+              recoveryPhase={recoveryPhrase}
+              setChecked={setChecked}
+              setConfirmPassword={setConfirmPassword}
+              setIsSetupComplete={setIsSetupComplete}
+              password={password}
+              setPassword={setPassword}
+              checked={checked}
             />
           </Suspense>
         ),

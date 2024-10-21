@@ -92,6 +92,7 @@ const PasswordSetup: FC<PasswordSetupProps> = ({
                 public_key: walletAddress,
                 amount_in_units: balance,
                 rfc_url: rfcUrl,
+                
               },
             },
           },

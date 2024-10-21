@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "My Chrome Extension",
+  "name": "Nexore",
   "version": "1.0",
-  "description": "A Chrome extension built",
+  "description": "",
   "action": {
     "default_popup": "index.html"
   },

@@ -35,6 +35,7 @@ export type ChainData = {
   public_key: string;
   amount_in_units: string;
   rfc_url: string;
+  derivation_path: string;
 };
 
 export type PrivateKeyRingStoreType = {

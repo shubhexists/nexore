@@ -1,35 +1,28 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
+import { HashRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Wallet,
-  Grid,
-  Clock,
-  Settings,
-  Moon,
-  Sun,
-  Menu,
-  Send,
-  Plus,
-  CreditCard,
-  Sparkles,
-  TrendingUp,
-  Circle as SwapHorizontal,
-  Copy,
-  Pencil,
-  ChevronLeft,
-  Check,
-} from 'lucide-react';
+import { Wallet, Grid, Clock, Settings, Moon, Sun, Menu, Plus, Copy, Pencil, ChevronLeft, Check } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isFirstTime } from './utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ActivityContent, NFTsContent, SettingsContent, WalletContent } from '@/pages';
 
-export default function Component() {
-  const [activeTab, setActiveTab] = useState('wallet');
+export default function WalletApp() {
+  return (
+    <HashRouter>
+      <Component />
+    </HashRouter>
+  );
+}
+
+function Component() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [_IsSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [open, setOpen] = useState(false);
@@ -37,6 +30,12 @@ export default function Component() {
   const [balance] = useState({ usd: 1234.56, sol: 12.5 });
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  const activeTab = location.pathname.slice(1) || 'wallet';
+
+  const handleTabChange = (tab: string) => {
+    navigate(`/${tab}`);
+  };
 
   const copyToClipboard = (text: string, index: number) => {
     navigator.clipboard.writeText(text);
@@ -96,10 +95,11 @@ export default function Component() {
           </SheetTrigger>
           <SheetContent side="left" className="w-[80px] sm:w-[80px] p-0">
             <div className="flex flex-col h-full bg-zinc-900 text-white">
-              <Button variant="ghost" className="justify-start p-4" onClick={() => setOpen(false)}>
-                <ChevronLeft className="h-4 w-4" />
+              <Button variant="ghost" className="flex items-center justify-start p-4" onClick={() => setOpen(false)}>
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Back
               </Button>
-              <div className="flex-1 overflow-auto py-2">
+              <div className="flex-1 overflow-auto py-2 no-scrollbar">
                 {accountsw.map((account, index) => (
                   <TooltipProvider key={account.name}>
                     <Tooltip>
@@ -107,7 +107,9 @@ export default function Component() {
                         <div className="px-4 py-2 cursor-pointer">
                           <Avatar className={`w-10 h-10 ${account.color}`}>
                             <AvatarImage src={account.image} alt={account.name} />
-                            <AvatarFallback>{index === 0 ? '✓' : `A${index + 1}`}</AvatarFallback>
+                            <AvatarFallback className="text-black">
+                              {index === 0 ? '✓' : `A${index + 1}`}
+                            </AvatarFallback>
                           </Avatar>
                           <div className="mt-1 text-xs text-center">{account.name}</div>
                         </div>
@@ -188,16 +190,13 @@ export default function Component() {
               </div>
               <div className="p-4 flex flex-col space-y-2">
                 <Button variant="ghost" size="sm" className="w-full justify-start">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add
+                  <Plus className="h-4 w-6" />
                 </Button>
                 <Button variant="ghost" size="sm" className="w-full justify-start">
-                  <Pencil className="h-4 w-4 mr-2" />
-                  Edit
+                  <Pencil className="h-4 w-6" />
                 </Button>
                 <Button variant="ghost" size="sm" className="w-full justify-start">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
+                  <Settings className="h-4 w-6" />
                 </Button>
               </div>
             </div>
@@ -224,7 +223,7 @@ export default function Component() {
 
       <AnimatePresence mode="wait">
         <motion.div
-          key={activeTab}
+          key={location.pathname}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
@@ -232,7 +231,13 @@ export default function Component() {
           className={`flex-1 overflow-hidden flex flex-col ${bgColor}`}
         >
           <ScrollArea className="flex-1 px-4">
-            <WalletContent balance={balance} isDarkMode={isDarkMode} />
+            <Routes>
+              <Route path="/" element={<WalletContent balance={balance} isDarkMode={isDarkMode} />} />
+              <Route path="/wallet" element={<WalletContent balance={balance} isDarkMode={isDarkMode} />} />
+              <Route path="/nfts" element={<NFTsContent isDarkMode={isDarkMode} />} />
+              <Route path="/activity" element={<ActivityContent isDarkMode={isDarkMode} />} />
+              <Route path="/settings" element={<SettingsContent isDarkMode={isDarkMode} />} />
+            </Routes>
           </ScrollArea>
         </motion.div>
       </AnimatePresence>
@@ -246,28 +251,28 @@ export default function Component() {
           icon={<Wallet />}
           label="Wallet"
           isActive={activeTab === 'wallet'}
-          onClick={() => setActiveTab('wallet')}
+          onClick={() => handleTabChange('wallet')}
           isDarkMode={isDarkMode}
         />
         <NavButton
           icon={<Grid />}
           label="NFTs"
           isActive={activeTab === 'nfts'}
-          onClick={() => setActiveTab('nfts')}
+          onClick={() => handleTabChange('nfts')}
           isDarkMode={isDarkMode}
         />
         <NavButton
           icon={<Clock />}
           label="Activity"
           isActive={activeTab === 'activity'}
-          onClick={() => setActiveTab('activity')}
+          onClick={() => handleTabChange('activity')}
           isDarkMode={isDarkMode}
         />
         <NavButton
           icon={<Settings />}
           label="Settings"
           isActive={activeTab === 'settings'}
-          onClick={() => setActiveTab('settings')}
+          onClick={() => handleTabChange('settings')}
           isDarkMode={isDarkMode}
         />
       </nav>
@@ -292,98 +297,5 @@ function NavButton({ icon, label, isActive, onClick, isDarkMode }: any) {
       {icon}
       <span className="text-xs mt-1">{label}</span>
     </Button>
-  );
-}
-
-function WalletContent({ balance, isDarkMode }: any) {
-  return (
-    <div className="py-6 space-y-6">
-      <motion.div
-        className="grid grid-cols-4 gap-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <ActionButton icon={<Plus />} label="Buy" isDarkMode={isDarkMode} />
-        <ActionButton icon={<Send />} label="Send" isDarkMode={isDarkMode} />
-        <ActionButton icon={<SwapHorizontal />} label="Swap" isDarkMode={isDarkMode} />
-        <ActionButton icon={<CreditCard />} label="Card" isDarkMode={isDarkMode} />
-      </motion.div>
-      <motion.div
-        className="space-y-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <h3 className="text-lg font-semibold flex items-center">
-          <Sparkles className={`h-5 w-5 mr-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
-          Your Assets
-        </h3>
-        <TokenItem
-          name="Solana"
-          symbol="SOL"
-          amount={balance.sol.toFixed(2)}
-          value={balance.usd.toFixed(2)}
-          change="+5.2%"
-          isDarkMode={isDarkMode}
-        />
-        <TokenItem name="Ethereum" symbol="ETH" amount="0.1" value="234.56" change="-2.1%" isDarkMode={isDarkMode} />
-        <TokenItem name="USDC" symbol="USDC" amount="100" value="100.00" change="0.0%" isDarkMode={isDarkMode} />
-      </motion.div>
-    </div>
-  );
-}
-
-function ActionButton({ icon, label, isDarkMode }: any) {
-  return (
-    <Button
-      variant="outline"
-      size="sm"
-      className={`w-full h-20 flex flex-col items-center justify-center space-y-1 rounded-xl ${
-        isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-100'
-      } transition-colors duration-300`}
-    >
-      {icon}
-      <span className="text-xs">{label}</span>
-    </Button>
-  );
-}
-
-function TokenItem({ name, symbol, amount, value, change, isDarkMode }: any) {
-  const isPositive = change.startsWith('+');
-  const changeColor = isPositive ? 'text-green-500' : 'text-red-500';
-
-  return (
-    <motion.div
-      className={`p-3 rounded-xl ${
-        isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-100'
-      } shadow-md transition-colors duration-300`}
-      whileHover={{ scale: 1.02 }}
-      transition={{ type: 'spring', stiffness: 300 }}
-    >
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <div
-            className={`w-8 h-8 rounded-full ${isDarkMode ? 'bg-blue-600' : 'bg-blue-500'} flex items-center justify-center text-white font-bold text-sm`}
-          >
-            {symbol[0]}
-          </div>
-          <div>
-            <h4 className="font-semibold text-sm">{name}</h4>
-            <p className="text-xs text-gray-500">{symbol}</p>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="font-semibold text-sm">
-            {amount} {symbol}
-          </p>
-          <p className="text-xs text-gray-500">${value}</p>
-          <p className={`text-xs ${changeColor} flex items-center justify-end`}>
-            <TrendingUp className={`h-3 w-3 mr-1 ${isPositive ? '' : 'transform rotate-180'}`} />
-            {change}
-          </p>
-        </div>
-      </div>
-    </motion.div>
   );
 }

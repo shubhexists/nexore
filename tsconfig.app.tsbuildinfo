@@ -1,1 +1,35 @@
-{"root":["./src/App.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/@types/svg.d.ts","./src/assets/icons/ethereum.tsx","./src/assets/icons/polygon.tsx","./src/assets/icons/solana.tsx","./src/components/ActionButton.tsx","./src/components/NavButton.tsx","./src/components/TokenItem.tsx","./src/components/WalletDropDown.tsx","./src/components/renderTabs.tsx","./src/components/ui/avatar.tsx","./src/components/ui/button.tsx","./src/components/ui/card.tsx","./src/components/ui/popover.tsx","./src/components/ui/scroll-area.tsx","./src/components/ui/sheet.tsx","./src/components/ui/tooltip.tsx","./src/lib/utils.ts","./src/pages/activity.tsx","./src/pages/nfts.tsx","./src/pages/settings.tsx","./src/pages/wallet.tsx","./src/shared/index.ts","./src/utils/getHeaderName.ts","./src/utils/index.ts","./shared/services/bip39/bip39.ts","./shared/constants/constants.ts"],"version":"5.6.2"}
+{
+  "root": [
+    "./src/App.tsx",
+    "./src/main.tsx",
+    "./src/vite-env.d.ts",
+    "./src/@types/svg.d.ts",
+    "./src/assets/icons/ethereum.tsx",
+    "./src/assets/icons/polygon.tsx",
+    "./src/assets/icons/solana.tsx",
+    "./src/components/ActionButton.tsx",
+    "./src/components/NavButton.tsx",
+    "./src/components/TokenItem.tsx",
+    "./src/components/WalletDropDown.tsx",
+    "./src/components/renderTabs.tsx",
+    "./src/components/ui/avatar.tsx",
+    "./src/components/ui/button.tsx",
+    "./src/components/ui/card.tsx",
+    "./src/components/ui/popover.tsx",
+    "./src/components/ui/scroll-area.tsx",
+    "./src/components/ui/sheet.tsx",
+    "./src/components/ui/tooltip.tsx",
+    "./src/lib/utils.ts",
+    "./src/pages/activity.tsx",
+    "./src/pages/index.tsx",
+    "./src/pages/nfts.tsx",
+    "./src/pages/settings.tsx",
+    "./src/pages/wallet.tsx",
+    "./src/shared/index.ts",
+    "./src/utils/getHeaderName.ts",
+    "./src/utils/index.ts",
+    "./shared/services/bip39/bip39.ts",
+    "./shared/constants/constants.ts"
+  ],
+  "version": "5.6.2"
+}

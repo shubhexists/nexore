@@ -1,19 +1,24 @@
 import { ActivityContent } from '@/pages/activity';
-import { NftsContent } from '@/pages/nfts';
+import { NFTsContent } from '@/pages';
 import { SettingsContent } from '@/pages/settings';
 import { WalletContent } from '@/pages/wallet';
 
-export function renderTabContent(activeTab: string) {
+interface RenderTabContentProps {
+  activeTab: string;
+  isDarkMode: boolean;
+}
+
+export function renderTabContent({ activeTab, isDarkMode }: RenderTabContentProps) {
   switch (activeTab) {
     case 'wallet':
-      return <WalletContent />;
+      return <WalletContent isDarkMode={isDarkMode} />;
     case 'nfts':
-      return <NftsContent />;
+      return <NFTsContent isDarkMode={isDarkMode} />;
     case 'activity':
-      return <ActivityContent />;
+      return <ActivityContent isDarkMode={isDarkMode} />;
     case 'settings':
-      return <SettingsContent />;
+      return <SettingsContent isDarkMode={isDarkMode} />;
     default:
-      return <WalletContent />;
+      return <WalletContent isDarkMode={isDarkMode} />;
   }
 }

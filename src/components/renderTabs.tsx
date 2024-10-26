@@ -1,7 +1,7 @@
 import { ActivityContent } from '@/pages/activity';
 import { NFTsContent } from '@/pages';
 import { SettingsContent } from '@/pages/settings';
-import { WalletContent } from '@/pages/wallet';
+import WalletContent from '@/pages/wallet';
 
 interface RenderTabContentProps {
   activeTab: string;

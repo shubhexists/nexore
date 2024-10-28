@@ -1,20 +1,40 @@
-'use client';
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Menu, ChevronRight, Twitter, MessageCircle } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  AccountType,
+  EncryptedData,
+  KEYRING_STORE,
+  PBKDF2Crypto,
+  PersistentStorage,
+  PRIVATE_KEYRING_STORE,
+} from '@/shared';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [openSheet, setOpenSheet] = useState<'menu' | 'forgotPassword' | null>(null);
+  const [password, setPassword] = useState<string>('');
 
   const togglePassword = () => setShowPassword(!showPassword);
 
   const handleTryMorePasswords = () => {
     setOpenSheet(null);
+  };
+
+  const handleLoginClick = async () => {
+    const storage = new PersistentStorage<EncryptedData>();
+    const data = await storage.getItem(KEYRING_STORE);
+    const pbkdf = new PBKDF2Crypto();
+    if (data) {
+      const decrypt = await pbkdf.decrypt(password, data);
+      console.log(decrypt);
+    } else {
+      const privatekeystorage = new PersistentStorage<AccountType.PrivateKeyRingStoreType>();
+      privatekeystorage.getItem(PRIVATE_KEYRING_STORE);
+    }
   };
 
   const slideAnimation = {
@@ -110,6 +130,8 @@ export default function Login() {
           <Input
             type={showPassword ? 'text' : 'password'}
             placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="bg-[#1E1E1E] text-white placeholder-gray-500 border-none"
           />
           <Button
@@ -122,7 +144,9 @@ export default function Login() {
           </Button>
         </div>
 
-        <Button className="w-full bg-white text-black hover:bg-gray-200 mb-4">Unlock</Button>
+        <Button className="w-full bg-white text-black hover:bg-gray-200 mb-4" onClick={handleLoginClick}>
+          Unlock
+        </Button>
 
         <Sheet
           open={openSheet === 'forgotPassword'}
@@ -157,7 +181,10 @@ export default function Login() {
                   >
                     Try more Passwords
                   </Button>
-                  <Button className="w-full bg-[#E53935] text-white font-semibold py-3 rounded-md hover:bg-[#D32F2F] transition-colors">
+                  <Button
+                    className="w-full bg-[#E53935] text-white font-semibold py-3 rounded-md hover:bg-[#D32F2F] transition-colors"
+                    onClick={handleLoginClick}
+                  >
                     Reset Nexore
                   </Button>
                 </div>

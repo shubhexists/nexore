@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Menu, ChevronRight, Twitter, MessageCircle } from 'lucide-react';
@@ -6,14 +7,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   AccountType,
+  DEFAULT_LOCK,
   EncryptedData,
   KEYRING_STORE,
+  LOCK_TIME,
   PBKDF2Crypto,
   PersistentStorage,
   PRIVATE_KEYRING_STORE,
 } from '@/shared';
 
-export default function Login() {
+export default function Login({ setIsLocked }: { setIsLocked: React.Dispatch<React.SetStateAction<boolean>> }) {
   const [showPassword, setShowPassword] = useState(false);
   const [openSheet, setOpenSheet] = useState<'menu' | 'forgotPassword' | null>(null);
   const [password, setPassword] = useState<string>('');
@@ -29,8 +32,15 @@ export default function Login() {
     const data = await storage.getItem(KEYRING_STORE);
     const pbkdf = new PBKDF2Crypto();
     if (data) {
-      const decrypt = await pbkdf.decrypt(password, data);
-      console.log(decrypt);
+      try {
+        await pbkdf.decrypt(password, data);
+        setIsLocked(true);
+
+        const storage = new PersistentStorage<number>();
+        await storage.setItem(LOCK_TIME, Date.now() + DEFAULT_LOCK);
+      } catch (error: any) {
+        console.log(error);
+      }
     } else {
       const privatekeystorage = new PersistentStorage<AccountType.PrivateKeyRingStoreType>();
       privatekeystorage.getItem(PRIVATE_KEYRING_STORE);

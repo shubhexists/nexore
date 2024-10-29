@@ -1,7 +1,7 @@
 import { FC } from 'react';
-import EthereumIcon from '../assets/icons/ethereum';
-import PolygonIcon from '../assets/icons/polygon';
-import SolanaIcon from '../assets/icons/solana';
+import EthereumIcon from '@/assets/icons/ethereum';
+import PolygonIcon from '@/assets/icons/polygon';
+import SolanaIcon from '@/assets/icons/solana';
 
 const logoMap: Record<string, FC<React.SVGProps<SVGSVGElement>>> = {
   Solana: SolanaIcon,

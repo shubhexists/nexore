@@ -1,6 +1,6 @@
-import { ActivityContent } from './activity';
-import { NFTsContent } from './nfts';
-import { SettingsContent } from './settings';
-import WalletContent from './wallet';
+import { ActivityContent } from '@/pages/activity';
+import { NFTsContent } from '@/pages/nfts';
+import { SettingsContent } from '@/pages/settings';
+import WalletContent from '@/pages/wallet';
 
 export { ActivityContent, NFTsContent, SettingsContent, WalletContent };

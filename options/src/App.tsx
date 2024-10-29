@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { HomeComponent } from './pages/home';
-import { ImportComponent } from './pages/import';
-import { CreateNewComponent } from './pages/createNewWallet';
-import { Pages } from './@types';
+import { HomeComponent } from '@/pages/home';
+import { ImportComponent } from '@/pages/import';
+import { CreateNewComponent } from '@/pages/createNewWallet';
+import { Pages } from '@/@types';
 
 export function App() {
   const [page, setPage] = useState<Pages>(Pages.MAIN);

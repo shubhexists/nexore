@@ -8,20 +8,20 @@ import { Wallet, Grid, Clock, Settings, Moon, Sun, Menu, Plus, Copy, Pencil, Che
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
-import { isFirstTime, isLocked } from './utils';
+import { isFirstTime, isLocked } from '@/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ActivityContent, NFTsContent, SettingsContent, WalletContent } from '@/pages';
-import Login from './pages/password';
+import Login from '@/pages/password';
 
 export default function WalletApp() {
-  const [isLock] = useState<boolean>(false);
+  const [isLock, setIsLocked] = useState<boolean>(false);
 
   useEffect(() => {
-    isLocked();
+    isLocked(setIsLocked);
   }, []);
 
   if (!isLock) {
-    return <Login />;
+    return <Login setIsLocked={setIsLocked} />;
   }
 
   return (

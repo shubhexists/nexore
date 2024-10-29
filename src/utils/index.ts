@@ -1,7 +1,7 @@
 import { NOT_HAS_CIPHER, PersistentStorage } from '@/shared';
 import { LOCK_TIME } from '@/shared';
 
-export * from './getHeaderName';
+export * from '@/utils/getHeaderName';
 
 export async function isFirstTime() {
   const storage = new PersistentStorage<boolean>();
@@ -12,17 +12,17 @@ export async function isFirstTime() {
   }
 }
 
-export async function isLocked() {
+export async function isLocked(setIsLocked: React.Dispatch<React.SetStateAction<boolean>>) {
   const storage = new PersistentStorage<number>();
   const isLocked = await storage.getItem(LOCK_TIME);
   if (isLocked) {
     const currentTime = Date.now();
     if (isLocked > currentTime) {
-      return false;
+      setIsLocked(true);
     } else {
-      return true;
+      setIsLocked(false);
     }
   } else {
-    return false;
+    setIsLocked(false);
   }
 }
